@@ -65,7 +65,6 @@ class Root(Frame):
             self.text.position.offset -= Vec2(0, 100) * dt
 
     def resize(self, dt: float, width, height):
-        print("Resize")
         self.size.constant = Vec2(width, height)
 
     def on_resize(self, width, height):

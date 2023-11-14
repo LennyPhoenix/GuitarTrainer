@@ -32,6 +32,7 @@ class Frame(Node):
         self.position.set_handler("on_update", self.on_position_update)
         self.behind_parent = behind_parent
         self.aabb = Aabb(Vec2(), Vec2())
+        self.broad_phase_aabb = Aabb(Vec2(), Vec2())
 
         self.parent = parent
         self.propagate_size()
@@ -70,8 +71,11 @@ class Frame(Node):
         self.aabb.position = self.position.calc_position(parent_aabb, self.aabb.size)
         self.set_position()
 
+        self.broad_phase_aabb = self.aabb
         for child in self.children:
             child.propagate_position()
+            self.broad_phase_aabb = self.broad_phase_aabb.union(child.broad_phase_aabb)
+        print(self.broad_phase_aabb)
 
     def set_position(self):
         """Update any drawables to use the newly assigned position."""
