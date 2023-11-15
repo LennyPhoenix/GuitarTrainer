@@ -40,9 +40,8 @@ class Text(Frame):
         self.propagate_position()
 
     def set_group(self, parent: Group | None, index: int) -> Group | None:
-        group = super().set_group(parent, index)
-        self.label.group = group
-        return group
+        self.label.group = Group(index, parent=parent)
+        return parent
 
     def set_size(self):
         self.label.width = self.aabb.size.x

@@ -73,8 +73,7 @@ class Stave(Frame):
             Rectangle(
                 color=(255, 255, 255, 255),
                 batch=batch,
-                size=Size(matrix=Mat2((1.0, 0.0, 0.0, 0.0)),
-                          constant=Vec2(0.0, 5.0)),
+                size=Size(matrix=Mat2((1.0, 0.0, 0.0, 0.0)), constant=Vec2(0.0, 5.0)),
                 position=Position(
                     pin=Pin(
                         local_anchor=Vec2(0.0, i / num_rows),

@@ -1,5 +1,6 @@
 class Colors:
-    BACKGROUND = (255, 255, 255, 255)
+    ELEMENT_BACKGROUND = (255, 255, 255, 255)
+    BACKGROUND = (196, 196, 196, 255)
     FOREGROUND = (0, 0, 0, 255)
     BORDER = (0, 0, 0, 255)
 

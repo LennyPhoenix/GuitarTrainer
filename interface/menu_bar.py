@@ -11,22 +11,24 @@ from interface.style import Colors, Sizing
 class MenuBar(Rectangle):
     def __init__(self, batch: Batch, parent: Frame | None):
         super().__init__(
-            color=Colors.BORDER,
+            color=Colors.ELEMENT_BACKGROUND,
             batch=batch,
             size=Size(matrix=Mat2((1.0, 0.0, 0.0, 0.0)),
-                      constant=Vec2(0.0, 64.0)),
+                      constant=Vec2(0.0, Sizing.TOP_BAR)),
             position=Position(pin=Pin.top_left()),
             parent=parent,
         )
-        self.fill = Rectangle(
-            color=Colors.BACKGROUND,
+
+        self.border = Rectangle(
+            color=Colors.BORDER,
             batch=batch,
             size=Size(
                 matrix=Mat2(),
-                constant=Vec2(Sizing.BORDER_SIZE, Sizing.BORDER_SIZE) * -2,
+                constant=Vec2(Sizing.BORDER_SIZE, Sizing.BORDER_SIZE) * 2,
             ),
             position=Position(),
             parent=self,
+            behind_parent=True,
         )
 
         self.title = Label(
@@ -34,6 +36,6 @@ class MenuBar(Rectangle):
             color=Colors.FOREGROUND,
             batch=batch,
             position=Position(pin=Pin.centre()),
-            parent=self.fill,
+            parent=self,
             font_size=32,
         )

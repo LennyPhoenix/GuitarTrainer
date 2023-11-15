@@ -75,7 +75,6 @@ class Frame(Node):
         for child in self.children:
             child.propagate_position()
             self.broad_phase_aabb = self.broad_phase_aabb.union(child.broad_phase_aabb)
-        print(self.broad_phase_aabb)
 
     def set_position(self):
         """Update any drawables to use the newly assigned position."""
@@ -89,7 +88,7 @@ class Frame(Node):
 
     def set_group(self, parent: Group | None, index: int) -> Group | None:
         """Create a group and update any drawables to use the newly assigned group."""
-        return Group(index, parent=parent)
+        return parent
 
     def propagate_indices(self, assigned_index: int) -> int:
         max_index = assigned_index - 1

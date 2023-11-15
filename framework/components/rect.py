@@ -25,9 +25,8 @@ class Rectangle(Frame):
         super().__init__(size, position, parent, behind_parent)
 
     def set_group(self, parent: Group | None, index: int) -> Group | None:
-        group = super().set_group(parent, index)
-        self.rect.group = group
-        return group
+        self.rect.group = Group(index, parent=parent)
+        return parent
 
     def set_size(self):
         self.rect.width, self.rect.height = self.aabb.size
