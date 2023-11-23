@@ -21,22 +21,17 @@ class Mat2(tuple):
 
     def __matmul__(self, other):
         if isinstance(other, Vec2):
-            r0 = self[0::2]
-            r1 = self[1::2]
-            return Vec2(sum(map(mul, r0, other)), sum(map(mul, r1, other)))
+            return Vec2(
+                self[0] * other.x + self[1] * other.y,
+                self[2] * other.x + self[3] * other.y,
+            )
         elif isinstance(other, Mat2):
-            r0 = self[0::2]
-            r1 = self[1::2]
-
-            c0 = other[0:2]
-            c1 = other[2:4]
-
             return Mat2(
                 (
-                    sum(map(mul, c0, r0)),
-                    sum(map(mul, c0, r1)),
-                    sum(map(mul, c1, r0)),
-                    sum(map(mul, c1, r1)),
+                    self[0] * other[0] + self[1] * other[2],
+                    self[0] * other[1] + self[1] * other[3],
+                    self[2] * other[0] + self[3] * other[2],
+                    self[2] * other[1] + self[3] * other[3],
                 )
             )
         else:
