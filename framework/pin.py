@@ -20,3 +20,7 @@ class Pin(UpdateHook):
     @staticmethod
     def bottom_left() -> "Pin":
         return Pin(local_anchor=Vec2(0.0, 0.0), remote_anchor=Vec2(0.0, 0.0))
+
+    @staticmethod
+    def top_right() -> "Pin":
+        return Pin(local_anchor=Vec2(1.0, 1.0), remote_anchor=Vec2(1.0, 1.0))

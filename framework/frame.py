@@ -43,6 +43,23 @@ class Frame(Node):
         other.propagate_size()
         other.propagate_position()
 
+    def reindex_tree(self):
+        if self.parent is not None:
+            self.parent.reindex_tree()
+        else:
+            self.propagate_indices(0)
+            self.propagate_groups(None)
+
+    def set_size(self):
+        """Update any drawables to use the newly assigned size."""
+
+    def set_position(self):
+        """Update any drawables to use the newly assigned position."""
+
+    def set_group(self, parent: Group | None, index: int) -> Group | None:
+        """Create a group and update any drawables to use the newly assigned group."""
+        return parent
+
     def propagate_size(self):
         # Ignore parent size if there is no parent
         if self.parent is not None:
@@ -56,9 +73,6 @@ class Frame(Node):
 
         for child in self.children:
             child.propagate_size()
-
-    def set_size(self):
-        """Update any drawables to use the newly assigned size."""
 
     def propagate_position(self):
         # Ignore parent AABB if there is no parent
@@ -75,20 +89,6 @@ class Frame(Node):
         for child in self.children:
             child.propagate_position()
             self.broad_phase_aabb = self.broad_phase_aabb.union(child.broad_phase_aabb)
-
-    def set_position(self):
-        """Update any drawables to use the newly assigned position."""
-
-    def on_size_update(self):
-        self.propagate_size()
-        self.propagate_position()
-
-    def on_position_update(self):
-        self.propagate_position()
-
-    def set_group(self, parent: Group | None, index: int) -> Group | None:
-        """Create a group and update any drawables to use the newly assigned group."""
-        return parent
 
     def propagate_indices(self, assigned_index: int) -> int:
         max_index = assigned_index - 1
@@ -119,9 +119,9 @@ class Frame(Node):
         for child in self.children:
             child.propagate_groups(group)
 
-    def reindex_tree(self):
-        if self.parent is not None:
-            self.parent.reindex_tree()
-        else:
-            self.propagate_indices(0)
-            self.propagate_groups(None)
+    def on_size_update(self):
+        self.propagate_size()
+        self.propagate_position()
+
+    def on_position_update(self):
+        self.propagate_position()
