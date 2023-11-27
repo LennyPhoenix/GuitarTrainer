@@ -9,6 +9,11 @@ from framework.mat2 import Mat2
 from interface import MenuBar
 from interface.style import Colors
 
+"""
+TODO:
+- Fix colour spelling
+"""
+
 
 class Root(Frame):
     def __init__(self):
@@ -23,7 +28,7 @@ class Root(Frame):
         )
 
         self.fill = Rectangle(
-            color=Colors.BACKGROUND,
+            colour=Colors.BACKGROUND,
             batch=self.batch,
             size=Size(matrix=Mat2()),
             position=Position(),
@@ -31,7 +36,7 @@ class Root(Frame):
             behind_parent=True,
         )
 
-        self.menu = MenuBar(self.batch, self)
+        self.menu = MenuBar(self.batch, self, self.window)
 
         self.reindex_tree()
 
@@ -62,7 +67,7 @@ class Stave(Frame):
     ):
         super().__init__(size, position, parent, behind_parent)
         self.left = Rectangle(
-            color=(255, 255, 255, 255),
+            colour=(255, 255, 255, 255),
             batch=batch,
             size=Size(matrix=Mat2((0, 0, 0, 1)), constant=Vec2(5, 0)),
             position=Position(pin=Pin.bottom_left()),
@@ -71,7 +76,7 @@ class Stave(Frame):
 
         self.rows = [
             Rectangle(
-                color=(255, 255, 255, 255),
+                colour=(255, 255, 255, 255),
                 batch=batch,
                 size=Size(matrix=Mat2((1.0, 0.0, 0.0, 0.0)), constant=Vec2(0.0, 5.0)),
                 position=Position(

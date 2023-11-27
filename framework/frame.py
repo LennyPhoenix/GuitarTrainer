@@ -47,8 +47,8 @@ class Frame(Node):
         if self.parent is not None:
             self.parent.reindex_tree()
         else:
-            self.propagate_indices(0)
             self.propagate_groups(None)
+            self.propagate_indices(0)
 
     def set_size(self):
         """Update any drawables to use the newly assigned size."""
@@ -56,9 +56,15 @@ class Frame(Node):
     def set_position(self):
         """Update any drawables to use the newly assigned position."""
 
-    def set_group(self, parent: Group | None, index: int) -> Group | None:
-        """Create a group and update any drawables to use the newly assigned group."""
+    def build_group(self, parent: Group | None) -> Group | None:
+        """ Transform the group that this and all children will inherit from.
+
+        Default behaviour is simply an identity that returns the parent group.
+        """
         return parent
+
+    def set_group(self, group: Group):
+        """Update any drawables to use the newly assigned group."""
 
     def propagate_size(self):
         # Ignore parent size if there is no parent
@@ -101,6 +107,7 @@ class Frame(Node):
         # Should be `assigned_index` if no children are reversed
         max_index += 1
         self.index = max_index
+        self.set_group(Group(order=self.index, parent=self._group))
 
         # Deal with "normal" children
         for child in self.children:
@@ -114,7 +121,8 @@ class Frame(Node):
         return max_index
 
     def propagate_groups(self, parent_group: Group | None):
-        group = self.set_group(parent_group, self.index)
+        group = self.build_group(parent_group)
+        self._group = group
 
         for child in self.children:
             child.propagate_groups(group)

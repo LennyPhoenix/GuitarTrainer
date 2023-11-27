@@ -37,9 +37,8 @@ class Label(Frame):
         self.propagate_size()
         self.propagate_position()
 
-    def set_group(self, parent: Group | None, index: int) -> Group | None:
-        self.label.group = Group(index, parent=parent)
-        return parent
+    def set_group(self, group: Group):
+        self.label.group = group
 
     def set_size(self):
         self.aabb.size.x = self.label.content_width

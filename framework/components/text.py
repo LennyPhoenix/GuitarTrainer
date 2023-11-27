@@ -39,13 +39,14 @@ class Text(Frame):
         self.propagate_size()
         self.propagate_position()
 
-    def set_group(self, parent: Group | None, index: int) -> Group | None:
-        self.label.group = Group(index, parent=parent)
-        return parent
+    def set_group(self, group: Group):
+        self.label.group = group
 
     def set_size(self):
         self.label.width = self.aabb.size.x
         self.aabb.size.y = self.label.content_height
 
     def set_position(self):
-        self.label.x, self.label.y = self.aabb.position + Vec2(0, self.label.content_height)
+        self.label.x, self.label.y = self.aabb.position + Vec2(
+            0, self.label.content_height
+        )

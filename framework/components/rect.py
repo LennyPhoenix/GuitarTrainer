@@ -1,32 +1,39 @@
 from pyglet.graphics import Batch, Group
-from pyglet import shapes
+from pyglet.shapes import Rectangle as PygletRectangle
 from framework import Size, Position, Frame
 
 
 class Rectangle(Frame):
     def __init__(
         self,
-        color: tuple[int, int, int, int],
+        colour: tuple[int, int, int, int],
         batch: Batch,
         size: Size,
         position: Position,
         parent: Frame | None,
         behind_parent: bool = False,
     ):
-        self.rect = shapes.Rectangle(
+        self.rect = PygletRectangle(
             0,
             0,
             0,
             0,
-            color,
+            colour,
             batch,
         )
 
         super().__init__(size, position, parent, behind_parent)
 
-    def set_group(self, parent: Group | None, index: int) -> Group | None:
-        self.rect.group = Group(index, parent=parent)
-        return parent
+    @property
+    def colour(self) -> tuple:
+        return self.rect.color
+
+    @colour.setter
+    def colour(self, colour: tuple[int, int, int, int]):
+        self.rect.color = colour
+
+    def set_group(self, group: Group):
+        self.rect.group = group
 
     def set_size(self):
         self.rect.width, self.rect.height = self.aabb.size

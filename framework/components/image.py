@@ -97,6 +97,5 @@ class Image(Frame):
                     y=self.aabb.position.y + diff.y * self.position.pin.local_anchor.y,
                 )
 
-    def set_group(self, parent: Group | None, index: int) -> Group | None:
-        self.sprite.group = Group(index, parent=parent)
-        return parent
+    def set_group(self, group: Group):
+        self.sprite.group = group

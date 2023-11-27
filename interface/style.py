@@ -3,6 +3,8 @@ class Colors:
     BACKGROUND = (196, 196, 196, 255)
     FOREGROUND = (0, 0, 0, 255)
     BORDER = (0, 0, 0, 255)
+    HOVER = (200, 200, 255, 220)
+    PRESSED = (100, 100, 187, 255)
 
 
 class Sizing:

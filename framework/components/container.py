@@ -33,14 +33,15 @@ class ScissorGroup(Group):
 
 
 class Container(Frame):
-    _parent_group: Group | None = None
+    _group: ScissorGroup
 
-    def set_group(self, parent: Group | None, index: int) -> Group | None:
-        self._parent_group = parent
-        return ScissorGroup(self.aabb, order=index, parent=parent)
+    def build_group(self, parent: Group | None) -> Group | None:
+        return ScissorGroup(self.aabb, parent=parent)
 
     def set_size(self):
-        self.set_group(self._parent_group, self.index)
+        if self._group is not None:
+            self._group.aabb = self.aabb
 
     def set_postion(self):
-        self.set_group(self._parent_group, self.index)
+        if self._group is not None:
+            self._group.aabb = self.aabb
