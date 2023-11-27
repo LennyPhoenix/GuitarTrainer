@@ -14,12 +14,12 @@ class Rectangle(Frame):
         behind_parent: bool = False,
     ):
         self.rect = PygletRectangle(
-            0,
-            0,
-            0,
-            0,
-            colour,
-            batch,
+            x=0,
+            y=0,
+            width=0,
+            height=0,
+            color=colour,
+            batch=batch,
         )
 
         super().__init__(size, position, parent, behind_parent)

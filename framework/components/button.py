@@ -23,8 +23,10 @@ class Button(Frame, EventDispatcher):
         return self._state
 
     def _set_state(self, state: State):
+        old = self._state
         self._state = state
-        self.dispatch_event("on_state_change", self._state)
+        if state != old:
+            self.dispatch_event("on_state_change", old, self._state)
 
     def on_mouse_motion(self, x, y, _dx, _dy):
         if self.state == Button.State.NORMAL and self.aabb.check_point(Vec2(x, y)):
