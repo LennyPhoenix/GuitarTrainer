@@ -6,7 +6,7 @@ from pyglet.event import EventDispatcher
 from framework.components import Image, Button, Rectangle
 from framework import Size, Position, Frame, Mat2, Vec2
 
-from interface.style import Colors, Sizing
+from interface.style import Colours, Sizing
 
 
 class ImageButton(Image, EventDispatcher):
@@ -38,10 +38,10 @@ class ImageButton(Image, EventDispatcher):
             position=Position(),
             parent=self,
         )
-        window.push_handlers(self)
+        self.button.register(window)
 
         self.border = Rectangle(
-            colour=Colors.BORDER,
+            colour=Colours.BORDER,
             batch=batch,
             size=Size(
                 matrix=Mat2(),
@@ -57,12 +57,12 @@ class ImageButton(Image, EventDispatcher):
     def on_state_change(self, old_state: Button.State, new_state: Button.State):
         match new_state:
             case Button.State.HOVER:
-                self.border.colour = self.sprite.color = Colors.HOVER
+                self.colour = Colours.HOVER
             case Button.State.PRESSED:
                 self.dispatch_event("on_pressed")
-                self.border.colour = Colors.PRESSED
+                self.colour = Colours.PRESSED
             case Button.State.NORMAL:
-                self.border.colour = Colors.BORDER
+                self.colour = (255, 255, 255, 255)
 
         if old_state == Button.State.PRESSED:
             self.dispatch_event("on_released")

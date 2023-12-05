@@ -4,6 +4,7 @@ from .container import Container
 from .label import Label
 from .image import Image
 from .button import Button
+from .scroll_container import ScrollContainer
 
 __all__ = [
     "Rectangle",
@@ -12,4 +13,5 @@ __all__ = [
     "Label",
     "Image",
     "Button",
+    "ScrollContainer",
 ]

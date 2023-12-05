@@ -4,15 +4,10 @@ from pyglet.graphics import Batch
 from pyglet.math import Vec2
 from pyglet.window import Window
 from framework import Frame, Size, Pin, Position
-from framework.components import Rectangle
+from framework.components import Rectangle, Container, Text, ScrollContainer
 from framework.mat2 import Mat2
 from interface import MenuBar
-from interface.style import Colors
-
-"""
-TODO:
-- Fix colour spelling
-"""
+from interface.style import Colours, Sizing
 
 
 class Root(Frame):
@@ -28,7 +23,7 @@ class Root(Frame):
         )
 
         self.fill = Rectangle(
-            colour=Colors.BACKGROUND,
+            colour=Colours.BACKGROUND,
             batch=self.batch,
             size=Size(matrix=Mat2()),
             position=Position(),
@@ -37,6 +32,33 @@ class Root(Frame):
         )
 
         self.menu = MenuBar(self.batch, self, self.window)
+
+        self.content_container = Container(
+            size=Size(
+                matrix=Mat2(),
+                constant=Vec2(0.0, -Sizing.TOP_BAR),
+            ),
+            position=Position(pin=Pin.bottom_left()),
+            parent=self,
+        )
+
+        self.scroll_container = ScrollContainer(
+            size=Size(
+                matrix=Mat2(),
+            ),
+            position=Position(),
+            parent=self.content_container,
+        )
+        self.scroll_container.register(self.window)
+
+        self.text = Text(
+            "HELLO WORLD, " * 10,
+            batch=self.batch,
+            colour=(0, 0, 0, 255),
+            size=Size(matrix=Mat2()),
+            position=Position(pin=Pin.top_left()),
+            parent=self.scroll_container.content,
+        )
 
         self.reindex_tree()
 

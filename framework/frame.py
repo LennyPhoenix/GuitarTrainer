@@ -18,6 +18,8 @@ class Frame(Node):
     index: int = 0
     behind_parent: bool
 
+    _group: Group | None = None
+
     def __init__(
         self,
         size: Size,

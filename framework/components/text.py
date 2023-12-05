@@ -8,7 +8,7 @@ class Text(Frame):
     def __init__(
         self,
         text: str,
-        color: tuple[int, int, int, int],
+        colour: tuple[int, int, int, int],
         batch: Batch,
         size: Size,
         position: Position,
@@ -21,7 +21,7 @@ class Text(Frame):
             x=0,
             y=0,
             batch=batch,
-            color=color,
+            color=colour,
             width=1,
             multiline=True,
             anchor_y="top",
@@ -38,6 +38,14 @@ class Text(Frame):
         self.label.text = new_text
         self.propagate_size()
         self.propagate_position()
+
+    @property
+    def colour(self) -> tuple[int, int, int, int]:
+        return self.label.color
+
+    @colour.setter
+    def colour(self, colour: tuple[int, int, int, int]):
+        self.label.color = colour
 
     def set_group(self, group: Group):
         self.label.group = group

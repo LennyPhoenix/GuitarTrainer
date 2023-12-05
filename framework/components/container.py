@@ -1,6 +1,7 @@
 from pyglet.graphics import Group
 from pyglet import gl
-from framework import Frame, Aabb
+from pyglet.gl import GLint
+from framework import Frame, Aabb, Vec2
 
 
 class ScissorGroup(Group):
@@ -12,9 +13,11 @@ class ScissorGroup(Group):
 
     def set_state(self):
         if gl.glIsEnabled(gl.GL_SCISSOR_TEST):
+            old_state = (GLint * 4)()
+            gl.glGetIntegerv(gl.GL_SCISSOR_BOX, old_state)
             self.previous_state = Aabb(
-                gl.glGetIntegerv(gl.GL_SCISSOR_BOX)[:2],
-                gl.glGetIntegerv(gl.GL_SCISSOR_BOX)[2:],
+                Vec2(*old_state[:2]),
+                Vec2(*old_state[2:]),
             )
         else:
             self.previous_state = None
@@ -33,7 +36,7 @@ class ScissorGroup(Group):
 
 
 class Container(Frame):
-    _group: ScissorGroup
+    _group: ScissorGroup | None
 
     def build_group(self, parent: Group | None) -> Group | None:
         return ScissorGroup(self.aabb, parent=parent)

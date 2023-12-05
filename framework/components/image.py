@@ -69,6 +69,14 @@ class Image(Frame):
         self._image = image
         self.sprite.image = image
 
+    @property
+    def colour(self) -> tuple:
+        return (*self.sprite.color, self.sprite.opacity)
+
+    @colour.setter
+    def colour(self, new_colour: tuple[int, int, int, int]):
+        self.sprite.color, self.sprite.opacity = new_colour[:3], new_colour[3]
+
     def set_size(self):
         self.sprite.update(scale=1.0, scale_x=1.0, scale_y=1.0)
         match self.size_mode:
