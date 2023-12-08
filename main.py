@@ -4,9 +4,9 @@ from pyglet.graphics import Batch
 from pyglet.math import Vec2
 from pyglet.window import Window
 from framework import Frame, Size, Pin, Position
-from framework.components import Rectangle, Container, Text, ScrollContainer
+from framework.components import Rectangle, Container
 from framework.mat2 import Mat2
-from interface import MenuBar
+from interface import MenuBar, SettingsPage
 from interface.style import Colours, Sizing
 
 
@@ -42,22 +42,9 @@ class Root(Frame):
             parent=self,
         )
 
-        self.scroll_container = ScrollContainer(
-            size=Size(
-                matrix=Mat2(),
-            ),
-            position=Position(),
-            parent=self.content_container,
-        )
-        self.scroll_container.register(self.window)
-
-        self.text = Text(
-            "HELLO WORLD, " * 10,
+        self.settings = SettingsPage(
             batch=self.batch,
-            colour=(0, 0, 0, 255),
-            size=Size(matrix=Mat2()),
-            position=Position(pin=Pin.top_left()),
-            parent=self.scroll_container.content,
+            parent=self.content_container,
         )
 
         self.reindex_tree()
@@ -100,7 +87,8 @@ class Stave(Frame):
             Rectangle(
                 colour=(255, 255, 255, 255),
                 batch=batch,
-                size=Size(matrix=Mat2((1.0, 0.0, 0.0, 0.0)), constant=Vec2(0.0, 5.0)),
+                size=Size(matrix=Mat2((1.0, 0.0, 0.0, 0.0)),
+                          constant=Vec2(0.0, 5.0)),
                 position=Position(
                     pin=Pin(
                         local_anchor=Vec2(0.0, i / num_rows),

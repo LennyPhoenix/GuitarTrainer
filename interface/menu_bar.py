@@ -9,30 +9,18 @@ from framework.components import Rectangle, Label, Image
 
 from .image_button import ImageButton
 from .style import Colours, Sizing
+from .bordered_rect import BorderedRectangle
 
 
-class MenuBar(Rectangle):
+class MenuBar(BorderedRectangle):
     def __init__(self, batch: Batch, parent: Frame | None, window: Window):
         super().__init__(
-            colour=Colours.ELEMENT_BACKGROUND,
             batch=batch,
             size=Size(
                 matrix=Mat2((1.0, 0.0, 0.0, 0.0)), constant=Vec2(0.0, Sizing.TOP_BAR)
             ),
             position=Position(pin=Pin.top_left()),
             parent=parent,
-        )
-
-        self.border = Rectangle(
-            colour=Colours.BORDER,
-            batch=batch,
-            size=Size(
-                matrix=Mat2(),
-                constant=Vec2(Sizing.BORDER_SIZE, Sizing.BORDER_SIZE) * 2,
-            ),
-            position=Position(),
-            parent=self,
-            behind_parent=True,
         )
 
         self.title = Label(
@@ -52,7 +40,8 @@ class MenuBar(Rectangle):
                 constant=Vec2(Sizing.PADDING, Sizing.PADDING) * -2,
             ),
             position=Position(
-                pin=Pin(local_anchor=Vec2(1.0, 0.5), remote_anchor=Vec2(1.0, 0.5)),
+                pin=Pin(local_anchor=Vec2(1.0, 0.5),
+                        remote_anchor=Vec2(1.0, 0.5)),
                 offset=Vec2(-Sizing.PADDING, 0.0),
             ),
             parent=self,

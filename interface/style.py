@@ -11,3 +11,4 @@ class Sizing:
     TOP_BAR = 64.0
     BORDER_SIZE = 4.0
     PADDING = 6.0
+    CONTENT_PADDING = PADDING * 3
