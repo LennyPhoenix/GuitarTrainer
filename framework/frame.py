@@ -25,7 +25,7 @@ class Frame(Node):
         size: Size,
         position: Position,
         parent: "Frame | None",
-        behind_parent: bool = False,
+        behind_parent: bool = False
     ):
         super().__init__()
         self.size = size
@@ -50,7 +50,9 @@ class Frame(Node):
             self.parent.reindex_tree()
         else:
             self.propagate_groups(None)
-            self.propagate_indices(0)
+
+    def draw(self):
+        """Draw any drawables."""
 
     def set_size(self):
         """Update any drawables to use the newly assigned size."""
@@ -65,8 +67,19 @@ class Frame(Node):
         """
         return parent
 
-    def set_group(self, group: Group):
+    def set_group(self, group: Group | None):
         """Update any drawables to use the newly assigned group."""
+
+    def propagate_draw(self):
+        for child in self.children:
+            if child.behind_parent:
+                child.propagate_draw()
+
+        self.draw()
+
+        for child in self.children:
+            if not child.behind_parent:
+                child.propagate_draw()
 
     def propagate_size(self):
         # Ignore parent size if there is no parent
@@ -98,33 +111,10 @@ class Frame(Node):
             child.propagate_position()
             self.broad_phase_aabb = self.broad_phase_aabb.union(child.broad_phase_aabb)
 
-    def propagate_indices(self, assigned_index: int) -> int:
-        max_index = assigned_index - 1
-
-        # Deal with reversed children first
-        for child in self.children:
-            if child.behind_parent:
-                max_index = max(max_index, child.propagate_indices(assigned_index))
-
-        # Should be `assigned_index` if no children are reversed
-        max_index += 1
-        self.index = max_index
-        self.set_group(Group(order=self.index, parent=self._group))
-
-        # Deal with "normal" children
-        for child in self.children:
-            if not child.behind_parent:
-                max_index = max(
-                    max_index,
-                    # If no reversed children: `assigned_index + 1`
-                    child.propagate_indices(self.index + 1),
-                )
-
-        return max_index
-
     def propagate_groups(self, parent_group: Group | None):
         group = self.build_group(parent_group)
         self._group = group
+        self.set_group(group)
 
         for child in self.children:
             child.propagate_groups(group)

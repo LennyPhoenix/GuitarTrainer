@@ -4,6 +4,7 @@ from .image_button import ImageButton
 from .scroll_container import ScrollContainer
 from .settings_page import SettingsPage
 from .bordered_rect import BorderedRectangle
+from .dropdown import DropDown
 
 __all__ = [
     "style",
@@ -12,4 +13,5 @@ __all__ = [
     "ScrollContainer",
     "SettingsPage",
     "BorderedRectangle",
+    "DropDown",
 ]

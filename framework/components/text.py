@@ -1,4 +1,4 @@
-from pyglet.graphics import Batch, Group
+from pyglet.graphics import Group
 from framework import Frame, Position, Size
 from pyglet.text import Label
 from pyglet.math import Vec2
@@ -9,7 +9,6 @@ class Text(Frame):
         self,
         text: str,
         colour: tuple[int, int, int, int],
-        batch: Batch,
         size: Size,
         position: Position,
         parent: "Frame | None",
@@ -20,7 +19,6 @@ class Text(Frame):
             text=text,
             x=0,
             y=0,
-            batch=batch,
             color=colour,
             width=1,
             multiline=True,
@@ -47,7 +45,10 @@ class Text(Frame):
     def colour(self, colour: tuple[int, int, int, int]):
         self.label.color = colour
 
-    def set_group(self, group: Group):
+    def draw(self):
+        self.label.draw()
+
+    def set_group(self, group: Group | None):
         self.label.group = group
 
     def set_size(self):

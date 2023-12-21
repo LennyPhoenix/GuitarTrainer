@@ -1,5 +1,4 @@
 from pyglet.image import AbstractImage
-from pyglet.graphics import Batch
 from pyglet.window import Window
 from pyglet.event import EventDispatcher
 
@@ -13,7 +12,6 @@ class ImageButton(Image, EventDispatcher):
     def __init__(
         self,
         image: AbstractImage,
-        batch: Batch,
         size: Size,
         position: Position,
         parent: Frame | None,
@@ -24,7 +22,6 @@ class ImageButton(Image, EventDispatcher):
     ):
         super().__init__(
             image,
-            batch,
             size,
             position,
             parent,
@@ -42,7 +39,6 @@ class ImageButton(Image, EventDispatcher):
 
         self.border = Rectangle(
             colour=Colours.BORDER,
-            batch=batch,
             size=Size(
                 matrix=Mat2(),
                 constant=Vec2(Sizing.BORDER_SIZE, Sizing.BORDER_SIZE) * 2,

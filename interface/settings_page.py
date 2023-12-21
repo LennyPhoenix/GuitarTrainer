@@ -1,18 +1,18 @@
-from framework import Frame, Mat2, Size, Position, Vec2, Pin
-from framework.components import Label
-from framework.components.rect import Rectangle
 from .bordered_rect import BorderedRectangle
-from interface.style import Colours, Sizing
+from .dropdown import DropDown
 
-from pyglet.graphics import Batch
+from interface.style import Colours, Sizing
+from framework import Frame, Mat2, Size, Position, Vec2, Pin
+from framework.components import Label, Rectangle
+
+from pyglet.window import Window
 
 
 class SettingsPage(Frame):
     components: list[tuple[BorderedRectangle, Label, Frame]]
 
-    def __init__(self, batch: Batch, parent: Frame | None):
+    def __init__(self, window: Window, parent: Frame | None):
         self.components = []
-        self.batch = batch
 
         super().__init__(
             size=Size(
@@ -23,19 +23,47 @@ class SettingsPage(Frame):
         )
 
         self.add_setting(
-            "Test",
+            "Input Device",
+            DropDown(
+                elements=["Test1", "Test2"],
+                size=Size(
+                    matrix=Mat2((1.0, 0.0, 0.0, 1.0)),
+                    constant=Vec2(-64.0, -64.0),
+                ),
+                position=Position(),
+                parent=self,  # tmp
+                window=window,
+            ),
+        )
+        self.add_setting(
+            "Mode",
             Rectangle(
-                size=Size(constant=Vec2(100, 50)),
+                size=Size(
+                    matrix=Mat2((1.0, 0.0, 0.0, 1.0)),
+                    constant=Vec2(-64.0, -64.0),
+                ),
                 position=Position(),
                 parent=None,
                 colour=Colours.FOREGROUND,
-                batch=self.batch,
+            ),
+        )
+        self.add_setting(
+            "Reset Progress",
+            Rectangle(
+                size=Size(
+                    matrix=Mat2((1.0, 0.0, 0.0, 1.0)),
+                    constant=Vec2(-64.0, -64.0),
+                ),
+                position=Position(),
+                parent=None,
+                colour=Colours.FOREGROUND,
             ),
         )
 
     def add_setting(self, label: str, component: Frame):
         position: Position
         parent: Frame
+        size_constant: Vec2
 
         if len(self.components) >= 1:
             position = Position(
@@ -45,6 +73,7 @@ class SettingsPage(Frame):
                 ),
                 offset=Vec2(0.0, -20.0),
             )
+            size_constant = Vec2(0.0, 64.0)
             parent = self.components[-1][0]
         else:
             position = Position(
@@ -54,6 +83,7 @@ class SettingsPage(Frame):
                 ),
                 offset=Vec2(0.0, -20.0),
             )
+            size_constant = Vec2(-64.0, 64.0)
             parent = self
 
         container = BorderedRectangle(
@@ -61,9 +91,9 @@ class SettingsPage(Frame):
             parent=parent,
             size=Size(
                 matrix=Mat2((1.0, 0.0, 0.0, 0.0)),
-                constant=Vec2(-64.0, 64.0),
+                constant=size_constant,
             ),
-            batch=self.batch,
+            behind_parent=True,
         )
 
         comp_label = Label(
@@ -77,9 +107,11 @@ class SettingsPage(Frame):
                 offset=Vec2(-24.0, 0.0),
             ),
             parent=container,
-            batch=self.batch,
         )
 
+        component.size = Size(
+            matrix=Mat2((0.8, 0.0, 0.0, 1.0)), constant=Vec2(-36.0, -12.0)
+        )
         component.position = Position(
             pin=Pin(
                 local_anchor=Vec2(0.0, 0.5),

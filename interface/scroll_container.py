@@ -3,7 +3,6 @@ from framework import Size, Position, Frame, Mat2, Vec2, Pin
 from .style import Colours
 
 from pyglet.window import Window
-from pyglet.graphics import Batch
 
 
 class ScrollContainer(Container):
@@ -16,7 +15,6 @@ class ScrollContainer(Container):
         size: Size,
         position: Position,
         parent: "Frame | None",
-        batch: Batch,
         behind_parent: bool = False,
     ):
         super().__init__(size, position, parent, behind_parent)
@@ -24,11 +22,10 @@ class ScrollContainer(Container):
         self.content = Frame(
             size=Size(
                 matrix=Mat2(),
-                constant=Vec2(0.0, -self.SCROLL_BAR_SIZE),
+                constant=Vec2(-24.0, -self.SCROLL_BAR_SIZE - 24.0),
             ),
-            position=Position(pin=Pin.bottom_left()),
+            position=Position(pin=Pin.bottom_left(), offset=Vec2(12.0, 12.0)),
             parent=self,
-            behind_parent=True,
         )
 
         self.scroll_bar = Rectangle(
@@ -38,7 +35,6 @@ class ScrollContainer(Container):
             ),
             position=Position(pin=Pin.top_right()),
             parent=self,
-            batch=batch,
             colour=Colours.ELEMENT_BACKGROUND,
         )
 
@@ -65,7 +61,6 @@ class ScrollContainer(Container):
             size=Size(matrix=Mat2()),
             position=Position(),
             colour=Colours.FOREGROUND,
-            batch=batch,
             parent=self.scroll_button,
         )
 
@@ -82,9 +77,11 @@ class ScrollContainer(Container):
                     ),
                 )
             )
-            factor = self.content.position.offset.y / (
-                self.content.broad_phase_aabb.size.y - self.content.aabb.size.y
-            )
+            diff = self.content.broad_phase_aabb.size.y - self.content.aabb.size.y
+            if diff != 0.0:
+                factor = self.content.position.offset.y / diff
+            else:
+                factor = 0.0
             self.scroll_button.position.pin = Pin(
                 local_anchor=Vec2(0.0, 1.0 - factor),
                 remote_anchor=Vec2(0.0, 1.0 - factor),
@@ -107,7 +104,7 @@ class ScrollContainer(Container):
     def on_mouse_scroll(self, x: float, y: float, _scroll_x: float, scroll_y: float):
         if self.aabb.check_point(Vec2(x, y)) and self.content is not None:
             self.content.position.offset = Vec2(
-                0.0,
+                12.0,
                 min(
                     max(self.content.position.offset.y - scroll_y * 20, 0.0),
                     self.content.broad_phase_aabb.size.y - self.content.aabb.size.y,

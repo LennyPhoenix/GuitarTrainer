@@ -1,7 +1,7 @@
 from pyglet.image import AbstractImage
 from pyglet.sprite import Sprite
 from pyglet.math import Vec2
-from pyglet.graphics import Batch, Group
+from pyglet.graphics import Group
 from framework import Size, Position, Frame
 
 from enum import Enum, auto
@@ -23,7 +23,6 @@ class Image(Frame):
     def __init__(
         self,
         image: AbstractImage,
-        batch: Batch,
         size: Size,
         position: Position,
         parent: Frame | None,
@@ -34,7 +33,6 @@ class Image(Frame):
         self._image = image
         self.sprite = Sprite(
             self.image,
-            batch=batch,
         )
 
         self._size_mode = size_mode
@@ -77,6 +75,9 @@ class Image(Frame):
     def colour(self, new_colour: tuple[int, int, int, int]):
         self.sprite.color, self.sprite.opacity = new_colour[:3], new_colour[3]
 
+    def draw(self):
+        self.sprite.draw()
+
     def set_size(self):
         self.sprite.update(scale=1.0, scale_x=1.0, scale_y=1.0)
         match self.size_mode:
@@ -105,5 +106,5 @@ class Image(Frame):
                     y=self.aabb.position.y + diff.y * self.position.pin.local_anchor.y,
                 )
 
-    def set_group(self, group: Group):
+    def set_group(self, group: Group | None):
         self.sprite.group = group
