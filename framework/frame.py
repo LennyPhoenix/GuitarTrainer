@@ -25,7 +25,7 @@ class Frame(Node):
         size: Size,
         position: Position,
         parent: "Frame | None",
-        behind_parent: bool = False
+        behind_parent: bool = False,
     ):
         super().__init__()
         self.size = size
@@ -45,9 +45,9 @@ class Frame(Node):
         other.propagate_size()
         other.propagate_position()
 
-    def reindex_tree(self):
+    def rebuild_groups(self):
         if self.parent is not None:
-            self.parent.reindex_tree()
+            self.parent.rebuild_groups()
         else:
             self.propagate_groups(None)
 
@@ -61,7 +61,7 @@ class Frame(Node):
         """Update any drawables to use the newly assigned position."""
 
     def build_group(self, parent: Group | None) -> Group | None:
-        """ Transform the group that this and all children will inherit from.
+        """Transform the group that this and all children will inherit from.
 
         Default behaviour is simply an identity that returns the parent group.
         """

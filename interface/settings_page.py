@@ -31,7 +31,7 @@ class SettingsPage(Frame):
                     constant=Vec2(-64.0, -64.0),
                 ),
                 position=Position(),
-                parent=self,  # tmp
+                parent=None,
                 window=window,
             ),
         )

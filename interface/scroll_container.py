@@ -22,9 +22,9 @@ class ScrollContainer(Container):
         self.content = Frame(
             size=Size(
                 matrix=Mat2(),
-                constant=Vec2(-24.0, -self.SCROLL_BAR_SIZE - 24.0),
+                constant=Vec2(-self.SCROLL_BAR_SIZE, 0.0),
             ),
-            position=Position(pin=Pin.bottom_left(), offset=Vec2(12.0, 12.0)),
+            position=Position(pin=Pin.bottom_left()),
             parent=self,
         )
 
@@ -104,7 +104,7 @@ class ScrollContainer(Container):
     def on_mouse_scroll(self, x: float, y: float, _scroll_x: float, scroll_y: float):
         if self.aabb.check_point(Vec2(x, y)) and self.content is not None:
             self.content.position.offset = Vec2(
-                12.0,
+                0.0,
                 min(
                     max(self.content.position.offset.y - scroll_y * 20, 0.0),
                     self.content.broad_phase_aabb.size.y - self.content.aabb.size.y,

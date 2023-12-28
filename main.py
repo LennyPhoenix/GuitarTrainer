@@ -1,11 +1,17 @@
+import gc
+
 from pyglet.app import run
 from pyglet.clock import schedule_once, unschedule
 from pyglet.math import Vec2
 from pyglet.window import Window
+
 from framework import Frame, Size, Pin, Position
 from framework.components import Rectangle, Container
 from framework.mat2 import Mat2
+
 from interface import MenuBar, SettingsPage
+from interface.bordered_rect import BorderedRectangle
+from interface.dropdown import DropDown
 from interface.style import Colours, Sizing
 
 
@@ -44,7 +50,8 @@ class Root(Frame):
            window=self.window,
         )
 
-        self.reindex_tree()
+        self.rebuild_groups()
+        gc.collect()
 
     def resize(self, _: float, width, height):
         self.size.constant = Vec2(width, height)

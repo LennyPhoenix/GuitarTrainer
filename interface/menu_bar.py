@@ -36,8 +36,7 @@ class MenuBar(BorderedRectangle):
                 constant=Vec2(Sizing.PADDING, Sizing.PADDING) * -2,
             ),
             position=Position(
-                pin=Pin(local_anchor=Vec2(1.0, 0.5),
-                        remote_anchor=Vec2(1.0, 0.5)),
+                pin=Pin(local_anchor=Vec2(1.0, 0.5), remote_anchor=Vec2(1.0, 0.5)),
                 offset=Vec2(-Sizing.PADDING, 0.0),
             ),
             parent=self,

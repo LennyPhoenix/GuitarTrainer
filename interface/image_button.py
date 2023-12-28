@@ -58,7 +58,7 @@ class ImageButton(Image, EventDispatcher):
                 self.dispatch_event("on_pressed")
                 self.colour = Colours.PRESSED
             case Button.State.NORMAL:
-                self.colour = (255, 255, 255, 255)
+                self.colour = Colours.ELEMENT_BACKGROUND
 
         if old_state == Button.State.PRESSED:
             self.dispatch_event("on_released")

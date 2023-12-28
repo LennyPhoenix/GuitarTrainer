@@ -1,9 +1,9 @@
-from typing import Optional, Self
+from typing import Self
 from weakref import ref, WeakSet
 
 
 class Node:
-    _parent: Optional[ref[Self]] = None
+    _parent: ref[Self] | None = None
 
     children: WeakSet[Self]
 
