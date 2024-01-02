@@ -10,8 +10,6 @@ from framework.components import Rectangle, Container
 from framework.mat2 import Mat2
 
 from interface import MenuBar, SettingsPage
-from interface.bordered_rect import BorderedRectangle
-from interface.dropdown import DropDown
 from interface.style import Colours, Sizing
 
 
@@ -46,8 +44,8 @@ class Root(Frame):
         )
 
         self.settings = SettingsPage(
-           parent=self.content_container,
-           window=self.window,
+            parent=self.content_container,
+            window=self.window,
         )
 
         self.rebuild_groups()
