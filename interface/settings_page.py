@@ -7,33 +7,40 @@ from framework.components import Label, Rectangle
 
 from pyglet.window import Window
 
+from engine import SoundManager
+
 
 class SettingsPage(Frame):
     components: list[tuple[BorderedRectangle, Label, Frame]]
 
-    def __init__(self, window: Window, parent: Frame | None):
+    def __init__(
+        self, window: Window, parent: Frame | None, sound_manager: SoundManager
+    ):
         self.components = []
 
         super().__init__(
             size=Size(
-                matrix=Mat2(), constant=Vec2(1.0, 1.0) * -2 * Sizing.CONTENT_PADDING
+                matrix=Mat2(),
+                constant=Vec2(1.0, 1.0) * -2 * Sizing.CONTENT_PADDING,
             ),
             position=Position(),
             parent=parent,
         )
 
+        dropdown = DropDown(
+            elements=sound_manager.get_available_devices,
+            size=Size(
+                matrix=Mat2((1.0, 0.0, 0.0, 1.0)),
+                constant=Vec2(-64.0, -64.0),
+            ),
+            position=Position(),
+            parent=None,
+            window=window,
+        )
+        dropdown.set_handler("on_picked", sound_manager.connect)
         self.add_setting(
             "Input Device",
-            DropDown(
-                elements=["Test1", "Test2"],
-                size=Size(
-                    matrix=Mat2((1.0, 0.0, 0.0, 1.0)),
-                    constant=Vec2(-64.0, -64.0),
-                ),
-                position=Position(),
-                parent=None,
-                window=window,
-            ),
+            dropdown,
         )
         self.add_setting(
             "Mode",

@@ -128,6 +128,11 @@ def frequency_to_offset(frequency: float) -> int:
     return round(12 * np.log2(frequency / 440))
 
 
+def offset_to_frequency(offset: int) -> float:
+    """Returns the frequency of a note, given the note's offset from A4."""
+    return 440 * 2 ** (offset / 12)
+
+
 def offset_to_octave(offset: int) -> int:
     """Returns the octave of a note (C incremented) given its semitone offset
     from A4."""
@@ -193,7 +198,10 @@ class TestNotes:
         )
 
     def test_frequency_to_note(self):
-        assert Pitch.from_offset(frequency_to_offset(440), Note.Mode.SHARPS) == Pitch(
+        assert Pitch.from_offset(
+            frequency_to_offset(440),
+            Note.Mode.SHARPS,
+        ) == Pitch(
             Note(
                 Name.A,
                 Accidental.NATURAL,
@@ -202,14 +210,20 @@ class TestNotes:
         )
 
         # Enharmonic Test
-        assert Pitch.from_offset(frequency_to_offset(466), Note.Mode.SHARPS) == Pitch(
+        assert Pitch.from_offset(
+            frequency_to_offset(466),
+            Note.Mode.SHARPS,
+        ) == Pitch(
             Note(
                 Name.A,
                 Accidental.SHARP,
             ),
             4,
         )
-        assert Pitch.from_offset(frequency_to_offset(466), Note.Mode.FLATS) == Pitch(
+        assert Pitch.from_offset(
+            frequency_to_offset(466),
+            Note.Mode.FLATS,
+        ) == Pitch(
             Note(
                 Name.B,
                 Accidental.FLAT,

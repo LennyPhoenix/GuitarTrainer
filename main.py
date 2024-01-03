@@ -12,9 +12,13 @@ from framework.mat2 import Mat2
 from interface import MenuBar, SettingsPage
 from interface.style import Colours, Sizing
 
+from engine import SoundManager
+
 
 class Root(Frame):
     def __init__(self):
+        self.sound_manager = SoundManager()
+
         self.window = Window(resizable=True)
         self.window.push_handlers(self)
 
@@ -46,6 +50,7 @@ class Root(Frame):
         self.settings = SettingsPage(
             parent=self.content_container,
             window=self.window,
+            sound_manager=self.sound_manager,
         )
 
         self.rebuild_groups()
@@ -86,7 +91,8 @@ class Stave(Frame):
         self.rows = [
             Rectangle(
                 colour=(255, 255, 255, 255),
-                size=Size(matrix=Mat2((1.0, 0.0, 0.0, 0.0)), constant=Vec2(0.0, 5.0)),
+                size=Size(matrix=Mat2((1.0, 0.0, 0.0, 0.0)),
+                          constant=Vec2(0.0, 5.0)),
                 position=Position(
                     pin=Pin(
                         local_anchor=Vec2(0.0, i / num_rows),

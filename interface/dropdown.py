@@ -1,4 +1,5 @@
 import gc
+from typing import Callable
 
 from pyglet import clock
 
@@ -43,7 +44,8 @@ class DropdownElement(Rectangle, EventDispatcher):
             text=self.option,
             colour=Colours.FOREGROUND,
             position=Position(
-                pin=Pin(local_anchor=Vec2(0.0, 0.5), remote_anchor=Vec2(0.0, 0.5))
+                pin=Pin(local_anchor=Vec2(0.0, 0.5),
+                        remote_anchor=Vec2(0.0, 0.5))
             ),
             parent=self.button,
             font_size=24,
@@ -51,7 +53,11 @@ class DropdownElement(Rectangle, EventDispatcher):
 
         self.button.set_handler("on_state_change", self.on_state_change)
 
-    def on_state_change(self, old_state: Button.State, new_state: Button.State):
+    def on_state_change(
+        self,
+        old_state: Button.State,
+        new_state: Button.State,
+    ):
         match new_state:
             case Button.State.HOVER:
                 self.colour = Colours.HOVER
@@ -66,8 +72,14 @@ class DropdownElement(Rectangle, EventDispatcher):
 DropdownElement.register_event_type("on_selected")
 
 
-class SelectionBox(BorderedRectangle, EventDispatcher):
-    def __init__(self, options: list[str], parent: Frame | None, window: Window):
+class SelectionBox(BorderedRectangle):
+    def __init__(
+        self,
+        options: list[str],
+        parent: Frame | None,
+        window: Window,
+        dropdown: "DropDown",
+    ):
         super().__init__(
             size=Size(
                 matrix=Mat2((1.0, 0.0, 0.0, 0.0)),
@@ -81,6 +93,8 @@ class SelectionBox(BorderedRectangle, EventDispatcher):
             ),
             parent=parent,
         )
+
+        self.dropdown = dropdown
 
         self.scroll_container = ScrollContainer(
             size=Size(matrix=Mat2(), min=Vec2(0.0, 0.0)),
@@ -114,16 +128,15 @@ class SelectionBox(BorderedRectangle, EventDispatcher):
             self.elements.append(element)
 
     def on_element_selected(self, option: str):
-        self.dispatch_event("on_picked", option)
+        self.dropdown.dispatch_event("on_picked", option)
 
 
-SelectionBox.register_event_type("on_picked")
+class DropDown(BorderedRectangle, EventDispatcher):
+    selection_box: SelectionBox | None = None
 
-
-class DropDown(BorderedRectangle):
     def __init__(
         self,
-        elements: list[str],
+        elements: Callable[[], list[str]],
         size: Size,
         position: Position,
         parent: "Frame | None",
@@ -132,6 +145,15 @@ class DropDown(BorderedRectangle):
         super().__init__(size, position, parent)
 
         self.window = window
+        self.elements = elements
+
+        self.button = Button(
+            size=Size(matrix=Mat2()),
+            position=Position(),
+            parent=self,
+        )
+        self.button.register(window)
+        self.button.set_handler("on_state_change", self.on_button_state_change)
 
         self.label = Label(
             text="Test",
@@ -140,12 +162,34 @@ class DropDown(BorderedRectangle):
             parent=self,
         )
 
-        self.selection_box = SelectionBox(elements, self, window)
-        self.selection_box.set_handler("on_picked", self.on_picked)
+    def on_button_state_change(
+        self,
+        old_state: Button.State,
+        new_state: Button.State,
+    ):
+        if old_state == Button.State.PRESSED and new_state == Button.State.HOVER:
+            if self.selection_box is not None:
+                self.close_box()
+            else:
+                self.selection_box = SelectionBox(
+                    self.elements(),
+                    self,
+                    self.window,
+                    self,
+                )
+                self.rebuild_groups()
+
+    def close_box(self):
+        self.selection_box = None
+        # This is a lovely side-effect of the way the garbage collector works
+        # and deals with cyclic references.
+        # Calling gc.collect() directly here will not work as the callstack
+        # will still contain a reference to the selection box.
+        clock.schedule_once(lambda _: gc.collect(), 0)
 
     def on_picked(self, option: str = "Hello"):
         self.label.text = option
-        del self.selection_box
-        # This is a lovely side-effect of the way the garbage collector works and deals with cyclic references.
-        # Calling gc.collect() directly here will not work as the callstack will still contain a reference to the selection box.
-        clock.schedule_once(lambda dt: gc.collect(), 0)
+        self.close_box()
+
+
+DropDown.register_event_type("on_picked")
