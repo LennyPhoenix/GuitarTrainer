@@ -1,5 +1,5 @@
 from framework import Frame, Position, Size
-from pyglet.graphics import Batch, Group
+from pyglet.graphics import Group
 from pyglet.text import Label as PygletLabel
 from pyglet.math import Vec2
 
@@ -22,6 +22,7 @@ class Label(Frame):
             anchor_y="top",
             anchor_x="left",
             font_size=font_size,
+            font_name="Noto Sans",
         )
         super().__init__(Size(), position, parent, behind_parent)
 

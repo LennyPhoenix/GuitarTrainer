@@ -1,3 +1,5 @@
+""" Barebones components for the framework. """
+
 from .rect import Rectangle
 from .text import Text
 from .container import Container

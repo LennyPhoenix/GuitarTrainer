@@ -10,7 +10,7 @@ from pyglet.window import Window
 from engine import SoundManager, StorageManager
 
 
-class SettingsPage(Frame):
+class SettingsPage(BorderedRectangle):
     components: list[tuple[BorderedRectangle, Label, Frame]]
 
     def __init__(
@@ -62,7 +62,7 @@ class SettingsPage(Frame):
         position: Position
         parent: Frame
         size_constant: Vec2
-
+        behind_parent: bool
         if len(self.components) >= 1:
             position = Position(
                 pin=Pin(
@@ -73,6 +73,7 @@ class SettingsPage(Frame):
             )
             size_constant = Vec2(0.0, 64.0)
             parent = self.components[-1][0]
+            behind_parent = True
         else:
             position = Position(
                 pin=Pin(
@@ -83,6 +84,7 @@ class SettingsPage(Frame):
             )
             size_constant = Vec2(-64.0, 64.0)
             parent = self
+            behind_parent = False
 
         container = BorderedRectangle(
             position=position,
@@ -91,7 +93,7 @@ class SettingsPage(Frame):
                 matrix=Mat2((1.0, 0.0, 0.0, 0.0)),
                 constant=size_constant,
             ),
-            behind_parent=True,
+            behind_parent=behind_parent,
         )
 
         comp_label = Label(

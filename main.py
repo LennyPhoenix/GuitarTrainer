@@ -4,19 +4,22 @@ from pyglet.app import run
 from pyglet.clock import schedule_once, unschedule
 from pyglet.math import Vec2
 from pyglet.window import Window
+from pyglet import resource
 
 from framework import Frame, Size, Pin, Position
 from framework.components import Rectangle, Container
 from framework.mat2 import Mat2
 
-from interface import MenuBar, SettingsPage, View
+from interface import MenuBar, SettingsPage, View, Tuner
 from interface.style import Colours, Sizing
 
-from engine import SoundManager, StorageManager, storage_manager
+from engine import SoundManager, StorageManager
 
 
 class Root(Frame):
     def __init__(self):
+        resource.add_font("assets/NotoSans-RegularMusic.ttf")
+
         self.storage_manager = StorageManager()
 
         self.sound_manager = SoundManager()
@@ -68,6 +71,19 @@ class Root(Frame):
             )
         else:
             self.settings_page = None
+
+        if view == View.TUNER:
+            self.tuner = Tuner(
+                self.sound_manager,
+                Size(
+                    matrix=Mat2(),
+                    constant=Vec2(1.0, 1.0) * -2 * Sizing.CONTENT_PADDING,
+                ),
+                Position(),
+                self.content_container,
+            )
+        else:
+            self.tuner = None
 
         self.rebuild()
 

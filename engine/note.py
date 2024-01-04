@@ -128,6 +128,12 @@ def frequency_to_offset(frequency: float) -> int:
     return round(12 * np.log2(frequency / 440))
 
 
+def frequency_to_offset_unrounded(frequency: float) -> int:
+    """Returns the semitone offset of a note from A4, given the note's
+    frequency."""
+    return 12 * np.log2(frequency / 440)
+
+
 def offset_to_frequency(offset: int) -> float:
     """Returns the frequency of a note, given the note's offset from A4."""
     return 440 * 2 ** (offset / 12)

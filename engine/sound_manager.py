@@ -1,4 +1,6 @@
 from pyaudio import PyAudio, paContinue, paFloat32, Stream
+from pyglet.event import EventDispatcher
+from pyglet import clock
 
 import numpy as np
 import scipy as sp
@@ -8,8 +10,11 @@ def interpolated_peak(alpha, beta, gamma):
     return 0.5 * (alpha - gamma) / (alpha - 2 * beta + gamma)
 
 
-class SoundManager:
-    window_size = 0.3
+class SoundManager(EventDispatcher):
+    noise_threshold: float = 0.1
+    window_size: float = 0.6
+    padded_size: float | None = 0.9
+    harmonics: int = 4
 
     _stream: Stream | None = None
     _buffer = bytes()
@@ -45,41 +50,56 @@ class SoundManager:
         _time_info,
         _status_flags,
     ) -> tuple[bytes | None, int]:
-        if in_data is not None:
-            self._buffer += in_data
-            self._buffer_length += frame_count
+        target_length = int(self._sample_rate * self.window_size)
 
-        if self._buffer_length > self._sample_rate * self.window_size:
+        if in_data is not None:
+            window = np.frombuffer(in_data, dtype=np.float32)
+            # Reset buffer if silent
+            if np.mean(np.abs(window)) < self.noise_threshold:
+                self._buffer = bytes()
+                self._buffer_length = 0
+                self._frequency = None
+            else:
+                self._buffer += in_data
+                self._buffer_length += frame_count
+
+        if self._buffer_length >= target_length:
+            # Sliding Window, means faster updates
+            self._buffer = self._buffer[-target_length * 4 :]
+            self._buffer_length = target_length
+
             self._read_frequency(self._buffer)
-            print(self.frequency)
-            self._buffer = bytes()
-            self._buffer_length = 0
+
+        clock.schedule_once(
+            lambda _: self.dispatch_event(
+                "on_frequency_change",
+                self.frequency,
+            ),
+            0.0,
+        )
 
         return (None, paContinue)
 
     def _read_frequency(self, block: bytes):
         window = np.frombuffer(block, dtype=np.float32)
 
-        if np.mean(np.abs(window)) < 0.01:
-            self._frequency = None
-            return
-
         # Hamming Window
         signal = np.hamming(len(window)) * window
 
         # Zero Padding
-        signal = np.pad(
-            signal,
-            [(0, int(0.5 * self._sample_rate) - len(signal))],
-            mode="constant",
-        )
+        if self.padded_size is not None:
+            signal = np.pad(
+                signal,
+                [(0, int(self.padded_size * self._sample_rate) - len(signal))],
+                mode="constant",
+            )
 
         # Take Magnitude of Fourier Transform
         signal = np.fft.fft(signal)
         signal = np.abs(signal)
 
         # Harmonic Product Spectrum
-        harmonics = 4  # TODO: Move to constant
+        harmonics = self.harmonics  # TODO: Move to constant
         spectra = [
             sp.signal.resample(signal, len(signal) // n)
             for n in range(1, harmonics + 1)
@@ -96,9 +116,9 @@ class SoundManager:
 
         hps = np.prod(cropped_spectra, axis=0)
 
-        # Crop start
+        # Crop start (Disabled)
         ignore = 0
-        peak = np.argmax(hps[ignore:len(hps) // 2]) + ignore
+        peak = np.argmax(hps[ignore : len(hps) // 2]) + ignore
 
         # Quadratic Interpolation
         alpha = signal[peak - 1]
@@ -112,7 +132,7 @@ class SoundManager:
 
         # Anything below 20Hz is probably background noise
         if frequency > 20.0:
-            self._frequency = frequency
+            self._frequency = float(frequency)
         else:
             self._frequency = None
 
@@ -142,7 +162,7 @@ class SoundManager:
             input_device_index=int(device["index"]),
             rate=self._sample_rate,
             # Read window in chunks as consistency is better this way:
-            frames_per_buffer=2**10,
+            frames_per_buffer=2**9,
             channels=1,
             format=paFloat32,
             stream_callback=self._callback,
@@ -152,3 +172,6 @@ class SoundManager:
         if self._stream is not None:
             self._stream.close()
         self._audio.terminate()
+
+
+SoundManager.register_event_type("on_frequency_change")

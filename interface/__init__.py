@@ -5,6 +5,7 @@ from .scroll_container import ScrollContainer
 from .settings_page import SettingsPage
 from .bordered_rect import BorderedRectangle
 from .dropdown import DropDown
+from .tuner import Tuner
 
 
 __all__ = [
@@ -16,4 +17,5 @@ __all__ = [
     "SettingsPage",
     "BorderedRectangle",
     "DropDown",
+    "Tuner",
 ]

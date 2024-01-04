@@ -7,6 +7,7 @@ from .note import (
     Name,
     Accidental,
     frequency_to_offset,
+    frequency_to_offset_unrounded,
     offset_to_octave,
     offset_to_frequency,
 )
@@ -19,6 +20,7 @@ __all__ = [
     "Name",
     "Accidental",
     "frequency_to_offset",
+    "frequency_to_offset_unrounded",
     "offset_to_octave",
     "offset_to_frequency",
 ]
