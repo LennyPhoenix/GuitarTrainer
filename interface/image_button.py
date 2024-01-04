@@ -50,7 +50,11 @@ class ImageButton(Image, EventDispatcher):
 
         self.button.set_handler("on_state_change", self.on_state_change)
 
-    def on_state_change(self, old_state: Button.State, new_state: Button.State):
+    def on_state_change(
+        self,
+        old_state: Button.State,
+        new_state: Button.State,
+    ):
         match new_state:
             case Button.State.HOVER:
                 self.colour = Colours.HOVER

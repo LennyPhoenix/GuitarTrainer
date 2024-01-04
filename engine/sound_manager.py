@@ -9,7 +9,7 @@ def interpolated_peak(alpha, beta, gamma):
 
 
 class SoundManager:
-    window_size = 0.25
+    window_size = 0.3
 
     _stream: Stream | None = None
     _buffer = bytes()
@@ -51,6 +51,7 @@ class SoundManager:
 
         if self._buffer_length > self._sample_rate * self.window_size:
             self._read_frequency(self._buffer)
+            print(self.frequency)
             self._buffer = bytes()
             self._buffer_length = 0
 
@@ -58,6 +59,10 @@ class SoundManager:
 
     def _read_frequency(self, block: bytes):
         window = np.frombuffer(block, dtype=np.float32)
+
+        if np.mean(np.abs(window)) < 0.01:
+            self._frequency = None
+            return
 
         # Hamming Window
         signal = np.hamming(len(window)) * window
@@ -93,7 +98,7 @@ class SoundManager:
 
         # Crop start
         ignore = 0
-        peak = np.argmax(hps[ignore: len(hps) // 2]) + ignore
+        peak = np.argmax(hps[ignore:len(hps) // 2]) + ignore
 
         # Quadratic Interpolation
         alpha = signal[peak - 1]
@@ -110,7 +115,6 @@ class SoundManager:
             self._frequency = frequency
         else:
             self._frequency = None
-        print(self.frequency)
 
     def connect(self, device_name: str):
         self.bytes = bytes()

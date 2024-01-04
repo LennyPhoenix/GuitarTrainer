@@ -9,15 +9,22 @@ from framework import Frame, Size, Pin, Position
 from framework.components import Rectangle, Container
 from framework.mat2 import Mat2
 
-from interface import MenuBar, SettingsPage
+from interface import MenuBar, SettingsPage, View
 from interface.style import Colours, Sizing
 
-from engine import SoundManager
+from engine import SoundManager, StorageManager, storage_manager
 
 
 class Root(Frame):
     def __init__(self):
+        self.storage_manager = StorageManager()
+
         self.sound_manager = SoundManager()
+        if self.storage_manager.input_device is not None:
+            try:
+                self.sound_manager.connect(self.storage_manager.input_device)
+            except ValueError:
+                print("Audio device unavailable, go to settings.")
 
         self.window = Window(resizable=True)
         self.window.push_handlers(self)
@@ -37,6 +44,7 @@ class Root(Frame):
         )
 
         self.menu = MenuBar(self, self.window)
+        self.menu.set_handler("on_view", self.on_view)
 
         self.content_container = Container(
             size=Size(
@@ -47,14 +55,21 @@ class Root(Frame):
             parent=self,
         )
 
-        self.settings = SettingsPage(
-            parent=self.content_container,
-            window=self.window,
-            sound_manager=self.sound_manager,
-        )
-
         self.rebuild_groups()
         gc.collect()
+
+    def on_view(self, view: View):
+        if view == View.SETTINGS:
+            self.settings_page = SettingsPage(
+                window=self.window,
+                parent=self.content_container,
+                sound_manager=self.sound_manager,
+                storage_manager=self.storage_manager,
+            )
+        else:
+            self.settings_page = None
+
+        self.rebuild()
 
     def resize(self, _: float, width, height):
         self.size.constant = Vec2(width, height)
@@ -91,8 +106,10 @@ class Stave(Frame):
         self.rows = [
             Rectangle(
                 colour=(255, 255, 255, 255),
-                size=Size(matrix=Mat2((1.0, 0.0, 0.0, 0.0)),
-                          constant=Vec2(0.0, 5.0)),
+                size=Size(
+                    matrix=Mat2((1.0, 0.0, 0.0, 0.0)),
+                    constant=Vec2(0.0, 5.0),
+                ),
                 position=Position(
                     pin=Pin(
                         local_anchor=Vec2(0.0, i / num_rows),

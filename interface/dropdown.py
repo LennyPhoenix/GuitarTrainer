@@ -136,6 +136,7 @@ class DropDown(BorderedRectangle, EventDispatcher):
 
     def __init__(
         self,
+        default: str,
         elements: Callable[[], list[str]],
         size: Size,
         position: Position,
@@ -156,7 +157,7 @@ class DropDown(BorderedRectangle, EventDispatcher):
         self.button.set_handler("on_state_change", self.on_button_state_change)
 
         self.label = Label(
-            text="Test",
+            text=default,
             colour=Colours.FOREGROUND,
             position=Position(pin=Pin.centre()),
             parent=self,
@@ -181,11 +182,7 @@ class DropDown(BorderedRectangle, EventDispatcher):
 
     def close_box(self):
         self.selection_box = None
-        # This is a lovely side-effect of the way the garbage collector works
-        # and deals with cyclic references.
-        # Calling gc.collect() directly here will not work as the callstack
-        # will still contain a reference to the selection box.
-        clock.schedule_once(lambda _: gc.collect(), 0)
+        self.rebuild()
 
     def on_picked(self, option: str = "Hello"):
         self.label.text = option

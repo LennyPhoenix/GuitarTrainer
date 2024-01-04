@@ -3,20 +3,27 @@ from .dropdown import DropDown
 
 from interface.style import Colours, Sizing
 from framework import Frame, Mat2, Size, Position, Vec2, Pin
-from framework.components import Label, Rectangle
+from framework.components import Label
 
 from pyglet.window import Window
 
-from engine import SoundManager
+from engine import SoundManager, StorageManager
 
 
 class SettingsPage(Frame):
     components: list[tuple[BorderedRectangle, Label, Frame]]
 
     def __init__(
-        self, window: Window, parent: Frame | None, sound_manager: SoundManager
+        self,
+        window: Window,
+        parent: Frame | None,
+        sound_manager: SoundManager,
+        storage_manager: StorageManager,
     ):
         self.components = []
+
+        self.sound_manager = sound_manager
+        self.storage_manager = storage_manager
 
         super().__init__(
             size=Size(
@@ -27,7 +34,11 @@ class SettingsPage(Frame):
             parent=parent,
         )
 
-        dropdown = DropDown(
+        in_device = storage_manager.input_device
+        if in_device is None:
+            in_device = "Please select"
+        input_device = DropDown(
+            default=in_device,
             elements=sound_manager.get_available_devices,
             size=Size(
                 matrix=Mat2((1.0, 0.0, 0.0, 1.0)),
@@ -37,35 +48,15 @@ class SettingsPage(Frame):
             parent=None,
             window=window,
         )
-        dropdown.set_handler("on_picked", sound_manager.connect)
+        input_device.set_handler("on_picked", self.on_input_device_assigned)
         self.add_setting(
             "Input Device",
-            dropdown,
+            input_device,
         )
-        self.add_setting(
-            "Mode",
-            Rectangle(
-                size=Size(
-                    matrix=Mat2((1.0, 0.0, 0.0, 1.0)),
-                    constant=Vec2(-64.0, -64.0),
-                ),
-                position=Position(),
-                parent=None,
-                colour=Colours.FOREGROUND,
-            ),
-        )
-        self.add_setting(
-            "Reset Progress",
-            Rectangle(
-                size=Size(
-                    matrix=Mat2((1.0, 0.0, 0.0, 1.0)),
-                    constant=Vec2(-64.0, -64.0),
-                ),
-                position=Position(),
-                parent=None,
-                colour=Colours.FOREGROUND,
-            ),
-        )
+
+    def on_input_device_assigned(self, option: str):
+        self.sound_manager.connect(option)
+        self.storage_manager.input_device = option
 
     def add_setting(self, label: str, component: Frame):
         position: Position
@@ -127,5 +118,7 @@ class SettingsPage(Frame):
             offset=Vec2(24.0, 0.0),
         )
         component.parent = container
+        component.propagate_size()
+        component.propagate_position()
 
         self.components.append((container, comp_label, component))

@@ -1,4 +1,5 @@
 from .sound_manager import SoundManager
+from .storage_manager import StorageManager
 
 from .note import (
     Pitch,
@@ -12,6 +13,7 @@ from .note import (
 
 __all__ = [
     "SoundManager",
+    "StorageManager",
     "Pitch",
     "Note",
     "Name",
