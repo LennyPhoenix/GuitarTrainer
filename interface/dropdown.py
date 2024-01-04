@@ -72,13 +72,12 @@ class DropdownElement(Rectangle, EventDispatcher):
 DropdownElement.register_event_type("on_selected")
 
 
-class SelectionBox(BorderedRectangle):
+class SelectionBox(BorderedRectangle, EventDispatcher):
     def __init__(
         self,
         options: list[str],
         parent: Frame | None,
         window: Window,
-        dropdown: "DropDown",
     ):
         super().__init__(
             size=Size(
@@ -93,8 +92,6 @@ class SelectionBox(BorderedRectangle):
             ),
             parent=parent,
         )
-
-        self.dropdown = dropdown
 
         self.scroll_container = ScrollContainer(
             size=Size(matrix=Mat2(), min=Vec2(0.0, 0.0)),
@@ -128,10 +125,13 @@ class SelectionBox(BorderedRectangle):
             self.elements.append(element)
 
     def on_element_selected(self, option: str):
-        self.dropdown.dispatch_event("on_picked", option)
+        self.dispatch_event("on_picked", option)
 
 
-class DropDown(BorderedRectangle, EventDispatcher):
+SelectionBox.register_event_type("on_picked")
+
+
+class Dropdown(BorderedRectangle, EventDispatcher):
     selection_box: SelectionBox | None = None
 
     def __init__(
@@ -168,6 +168,13 @@ class DropDown(BorderedRectangle, EventDispatcher):
         old_state: Button.State,
         new_state: Button.State,
     ):
+        if new_state == Button.State.HOVER:
+            self.colour = Colours.HOVER
+        elif new_state == Button.State.PRESSED:
+            self.colour = Colours.PRESSED
+        else:
+            self.colour = Colours.ELEMENT_BACKGROUND
+
         if old_state == Button.State.PRESSED and new_state == Button.State.HOVER:
             if self.selection_box is not None:
                 self.close_box()
@@ -176,17 +183,19 @@ class DropDown(BorderedRectangle, EventDispatcher):
                     self.elements(),
                     self,
                     self.window,
-                    self,
                 )
+                self.selection_box.set_handler(
+                    "on_picked", self.on_element_picked)
                 self.rebuild_groups()
 
     def close_box(self):
         self.selection_box = None
         self.rebuild()
 
-    def on_picked(self, option: str = "Hello"):
+    def on_element_picked(self, option: str):
         self.label.text = option
         self.close_box()
+        self.dispatch_event("on_picked", option)
 
 
-DropDown.register_event_type("on_picked")
+Dropdown.register_event_type("on_picked")

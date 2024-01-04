@@ -85,8 +85,9 @@ class Note:
     def __str__(self) -> str:
         return f"{self.name}{self.accidental}"
 
+    @property
     def offset(self) -> int:
-        """Calculates the offset of this note from A."""
+        """The offset of this note from A."""
         return self.name.value + self.accidental.value
 
     @classmethod
@@ -112,9 +113,10 @@ class Pitch:
     def __str__(self) -> str:
         return f"{self.note}{self.octave}"
 
+    @property
     def offset(self) -> int:
-        """Calculates the offset of this pitch from A4."""
-        return self.note.offset() + (self.octave - 4) * 12
+        """The offset of this pitch from A4."""
+        return self.note.offset + (self.octave - 4) * 12
 
     @classmethod
     def from_offset(cls, offset: int, mode: Note.Mode) -> Self:

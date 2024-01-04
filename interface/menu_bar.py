@@ -82,20 +82,40 @@ class MenuBar(BorderedRectangle, EventDispatcher):
         )
         self.tuner_button.set_handler("on_released", self.on_tuner)
 
-    def on_settings(self):
-        if self.current_view == View.SETTINGS:
+        self.fretboard_button = ImageButton(
+            image("assets/fretboard.png"),
+            size=Size(
+                matrix=Mat2((1.0, 0.0, 0.0, 1.0)),
+            ),
+            position=Position(
+                pin=Pin(
+                    local_anchor=Vec2(1.0, 0.5),
+                    remote_anchor=Vec2(0.0, 0.5),
+                ),
+                offset=Vec2(-Sizing.PADDING * 2, 0.0),
+            ),
+            parent=self.tuner_button,
+            window=window,
+            size_mode=Image.SizeMode.STRETCH,
+            position_mode=Image.PositionMode.CENTRE,
+        )
+        self.fretboard_button.set_handler("on_released", self.on_fretboard)
+
+    def switch(self, view: View):
+        if self.current_view == view:
             self.current_view = View.APP
         else:
-            self.current_view = View.SETTINGS
-
+            self.current_view = view
         self.dispatch_event("on_view", self.current_view)
+
+    def on_settings(self):
+        self.switch(View.SETTINGS)
 
     def on_tuner(self):
-        if self.current_view == View.TUNER:
-            self.current_view = View.APP
-        else:
-            self.current_view = View.TUNER
-        self.dispatch_event("on_view", self.current_view)
+        self.switch(View.TUNER)
+
+    def on_fretboard(self):
+        self.switch(View.FRETBOARD)
 
 
 MenuBar.register_event_type("on_view")

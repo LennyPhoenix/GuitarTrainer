@@ -10,10 +10,10 @@ from framework import Frame, Size, Pin, Position
 from framework.components import Rectangle, Container
 from framework.mat2 import Mat2
 
-from interface import MenuBar, SettingsPage, View, Tuner
+from interface import MenuBar, SettingsPage, View, Tuner, FretboardExplorer
 from interface.style import Colours, Sizing
 
-from engine import SoundManager, StorageManager
+from engine import SoundManager, StorageManager, sound_manager
 
 
 class Root(Frame):
@@ -84,6 +84,20 @@ class Root(Frame):
             )
         else:
             self.tuner = None
+
+        if view == View.FRETBOARD:
+            self.fretboard = FretboardExplorer(
+                window=self.window,
+                sound_manager=self.sound_manager,
+                size=Size(
+                    matrix=Mat2(),
+                    constant=Vec2(1.0, 1.0) * -2 * Sizing.CONTENT_PADDING,
+                ),
+                position=Position(),
+                parent=self.content_container,
+            )
+        else:
+            self.fretboard = None
 
         self.rebuild()
 

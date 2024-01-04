@@ -1,5 +1,5 @@
 from .bordered_rect import BorderedRectangle
-from .dropdown import DropDown
+from .dropdown import Dropdown
 
 from interface.style import Colours, Sizing
 from framework import Frame, Mat2, Size, Position, Vec2, Pin
@@ -37,7 +37,7 @@ class SettingsPage(BorderedRectangle):
         in_device = storage_manager.input_device
         if in_device is None:
             in_device = "Please select"
-        input_device = DropDown(
+        input_device = Dropdown(
             default=in_device,
             elements=sound_manager.get_available_devices,
             size=Size(

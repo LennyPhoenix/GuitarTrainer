@@ -25,6 +25,8 @@ class Tuner(BorderedRectangle):
         sound_manager.push_handlers(self)
 
         self.guide = Text(
+            # TODO: Generate based on current setting??? We have string
+            # definitions in the engine
             """Standard tuning, low to high: (Bass)
 1: E2 (E1)
 2: A2 (A1)
@@ -75,7 +77,8 @@ class Tuner(BorderedRectangle):
             "0Hz",
             colour=Colours.FOREGROUND,
             position=Position(
-                pin=Pin(remote_anchor=Vec2(0.5, 1.0), local_anchor=Vec2(0.5, 0.0)),
+                pin=Pin(remote_anchor=Vec2(0.5, 1.0),
+                        local_anchor=Vec2(0.5, 0.0)),
                 offset=Vec2(0.0, 20.0),
             ),
             font_size=20,
@@ -89,7 +92,8 @@ class Tuner(BorderedRectangle):
                 constant=Vec2(0.0, 8.0),
             ),
             position=Position(
-                pin=Pin(local_anchor=Vec2(0.5, 0.5), remote_anchor=Vec2(0.35, 0.5))
+                pin=Pin(local_anchor=Vec2(0.5, 0.5),
+                        remote_anchor=Vec2(0.35, 0.5))
             ),
             parent=self,
         )
@@ -139,7 +143,7 @@ class Tuner(BorderedRectangle):
             parent=self.range,
         )
 
-    def on_frequency_change(self, frequency: float | None) -> None:
+    def on_frequency_change(self, frequency: float | None):
         if frequency is None:
             self.note_label.text = "Note: N/A"
             self.actual_frequency_label.text = "0Hz"
