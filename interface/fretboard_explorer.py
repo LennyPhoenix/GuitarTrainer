@@ -1,5 +1,5 @@
 from pyglet.window import Window
-from engine import GUITAR_STRINGS, BASS_STRINGS, frequency_to_offset, Pitch, Note
+from engine import GUITAR_STRINGS, BASS_STRINGS, Pitch, Note
 
 from framework import Frame, Size, Pin, Position, Mat2, Vec2
 from framework.components import Label, Text
@@ -13,10 +13,6 @@ from .bordered_rect import BorderedRectangle
 
 
 class FretboardExplorer(BorderedRectangle):
-    shown_pitch: Pitch | None = None
-    last_pitch: Pitch | None = None
-    last_pitch_count: int = 0
-
     def __init__(
         self,
         window: Window,
@@ -101,12 +97,13 @@ Blue - Octave""",
             case "Bass":
                 self.construct_fretboard(BASS_STRINGS)
 
-    def on_new_pitch(self, pitch: Pitch | None):
+    def on_new_offset(self, offset: int | None):
         self.fretboard.clear_highlight()
-        if pitch is None:
+        if offset is None:
             self.note_label.text = "Note: N/A"
             return
 
+        pitch = Pitch.from_offset(offset, Note.Mode.SHARPS)
         self.note_label.text = f"Note: {pitch}"
 
         self.fretboard.highlight_pitch(pitch)

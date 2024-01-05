@@ -5,7 +5,7 @@ from pyglet import clock
 import numpy as np
 import scipy as sp
 
-from .note import Pitch, Note, frequency_to_offset
+from .note import frequency_to_offset
 
 
 def interpolated_peak(alpha, beta, gamma):
@@ -19,9 +19,9 @@ class SoundManager(EventDispatcher):
     padded_size: float | None = 0.9
     harmonics: int = 4
 
-    broadcasted_pitch: Pitch | None = None
-    last_pitch: Pitch | None = None
-    last_pitch_count: int = 0
+    broadcasted_offset: int | None = None
+    last_offset: int | None = None
+    last_offset_counter: int = 0
 
     _stream: Stream | None = None
     _buffer = bytes()
@@ -179,23 +179,25 @@ class SoundManager(EventDispatcher):
         # Convert frequency to pitch
         if frequency is not None:
             offset = frequency_to_offset(frequency)
-            pitch = Pitch.from_offset(offset, Note.Mode.SHARPS)
         else:
-            pitch = None
+            offset = None
 
-        # Increment counter if pitch is the same as last pitch
-        if pitch == self.last_pitch:
-            self.last_pitch_count += 1
-        # Reset counter if pitch is different from last pitch
+        # Increment counter if offset is the same as last offset
+        if offset == self.last_offset:
+            self.last_offset_counter += 1
+        # Reset counter if offset is different from last offset
         else:
-            self.last_pitch = pitch
-            self.last_pitch_count = 0
+            self.last_offset = offset
+            self.last_offset_counter = 0
 
-        # Only broadcast to others if the pitch has been the same for 3
-        # frames, and is different from the last *broadcasted* pitch.
-        if self.last_pitch_count >= 3 and self.last_pitch != self.broadcasted_pitch:
-            self.broadcasted_pitch = self.last_pitch
-            self.dispatch_event("on_new_pitch", self.broadcasted_pitch)
+        # Only broadcast to others if the offset has been the same for 3
+        # frames, and is different from the last *broadcasted* offset.
+        if (
+            self.last_offset_counter >= 3
+            and self.last_offset != self.broadcasted_offset
+        ):
+            self.broadcasted_offset = self.last_offset
+            self.dispatch_event("on_new_offset", self.broadcasted_offset)
 
     def __del__(self) -> None:
         if self._stream is not None:
@@ -204,4 +206,4 @@ class SoundManager(EventDispatcher):
 
 
 SoundManager.register_event_type("on_frequency_change")
-SoundManager.register_event_type("on_new_pitch")
+SoundManager.register_event_type("on_new_offset")
