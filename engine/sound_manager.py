@@ -5,8 +5,11 @@ from pyglet import clock
 import numpy as np
 import scipy as sp
 
+from .note import Pitch, Note, frequency_to_offset
+
 
 def interpolated_peak(alpha, beta, gamma):
+    """Quadratic interpolation of the peak of a parabola."""
     return 0.5 * (alpha - gamma) / (alpha - 2 * beta + gamma)
 
 
@@ -15,6 +18,10 @@ class SoundManager(EventDispatcher):
     window_size: float = 0.6
     padded_size: float | None = 0.9
     harmonics: int = 4
+
+    broadcasted_pitch: Pitch | None = None
+    last_pitch: Pitch | None = None
+    last_pitch_count: int = 0
 
     _stream: Stream | None = None
     _buffer = bytes()
@@ -168,6 +175,28 @@ class SoundManager(EventDispatcher):
             stream_callback=self._callback,
         )
 
+    def on_frequency_change(self, frequency: float | None):
+        # Convert frequency to pitch
+        if frequency is not None:
+            offset = frequency_to_offset(frequency)
+            pitch = Pitch.from_offset(offset, Note.Mode.SHARPS)
+        else:
+            pitch = None
+
+        # Increment counter if pitch is the same as last pitch
+        if pitch == self.last_pitch:
+            self.last_pitch_count += 1
+        # Reset counter id pitch is different from last pitch
+        else:
+            self.last_pitch = pitch
+            self.last_pitch_count = 0
+
+        # Only update the fretboard if the pitch has been the same for 3
+        # frames, and is different from the currently shown pitch.
+        if self.last_pitch_count >= 3 and self.last_pitch != self.broadcasted_pitch:
+            self.broadcasted_pitch = self.last_pitch
+            self.dispatch_event("on_new_pitch", self.broadcasted_pitch)
+
     def __del__(self) -> None:
         if self._stream is not None:
             self._stream.close()
@@ -175,3 +204,4 @@ class SoundManager(EventDispatcher):
 
 
 SoundManager.register_event_type("on_frequency_change")
+SoundManager.register_event_type("on_new_pitch")

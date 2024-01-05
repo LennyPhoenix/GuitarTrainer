@@ -101,34 +101,14 @@ Blue - Octave""",
             case "Bass":
                 self.construct_fretboard(BASS_STRINGS)
 
-    def on_frequency_change(self, frequency: float | None):
-        # Convert frequency to pitch
-        if frequency is not None:
-            offset = frequency_to_offset(frequency)
-            pitch = Pitch.from_offset(offset, Note.Mode.SHARPS)
-        else:
-            pitch = None
+    def on_new_pitch(self, pitch: Pitch | None):
+        self.fretboard.clear_highlight()
+        if pitch is None:
+            self.note_label.text = "Note: N/A"
+            return
 
-        # Increment counter if pitch is the same as last pitch
-        if pitch == self.last_pitch:
-            self.last_pitch_count += 1
-        # Reset counter id pitch is different from last pitch
-        else:
-            self.last_pitch = pitch
-            self.last_pitch_count = 0
+        self.note_label.text = f"Note: {pitch}"
 
-        # Only update the fretboard if the pitch has been the same for 3
-        # frames, and is different from the currently shown pitch.
-        if self.last_pitch_count >= 3 and self.last_pitch != self.shown_pitch:
-            self.shown_pitch = self.last_pitch
-
-            self.fretboard.clear_highlight()
-            if self.shown_pitch is None:
-                self.note_label.text = "Note: N/A"
-                return
-
-            self.note_label.text = f"Note: {self.shown_pitch}"
-
-            self.fretboard.highlight_pitch(self.shown_pitch)
-            self.fretboard.highlight_octaves(self.shown_pitch)
-            self.rebuild()
+        self.fretboard.highlight_pitch(pitch)
+        self.fretboard.highlight_octaves(pitch)
+        self.rebuild()
