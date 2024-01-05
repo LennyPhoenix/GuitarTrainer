@@ -186,13 +186,13 @@ class SoundManager(EventDispatcher):
         # Increment counter if pitch is the same as last pitch
         if pitch == self.last_pitch:
             self.last_pitch_count += 1
-        # Reset counter id pitch is different from last pitch
+        # Reset counter if pitch is different from last pitch
         else:
             self.last_pitch = pitch
             self.last_pitch_count = 0
 
-        # Only update the fretboard if the pitch has been the same for 3
-        # frames, and is different from the currently shown pitch.
+        # Only broadcast to others if the pitch has been the same for 3
+        # frames, and is different from the last *broadcasted* pitch.
         if self.last_pitch_count >= 3 and self.last_pitch != self.broadcasted_pitch:
             self.broadcasted_pitch = self.last_pitch
             self.dispatch_event("on_new_pitch", self.broadcasted_pitch)
