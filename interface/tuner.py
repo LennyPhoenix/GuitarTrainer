@@ -17,11 +17,13 @@ class Tuner(BorderedRectangle):
     def __init__(
         self,
         sound_manager: SoundManager,
-        size: Size,
-        position: Position,
         parent: Frame | None,
     ):
-        super().__init__(size, position, parent)
+        super().__init__(
+            size=Size(matrix=Mat2()),
+            position=Position(),
+            parent=parent,
+        )
         sound_manager.push_handlers(self)
 
         self.guide = Text(

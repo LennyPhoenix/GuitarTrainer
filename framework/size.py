@@ -8,6 +8,8 @@ from framework.update_hook import UpdateHook
 
 @dataclass
 class Size(UpdateHook):
+    """Size of a Frame. Defaults to 0x0."""
+
     constant: Vec2 = field(default_factory=lambda: Vec2())
     matrix: Mat2 = Mat2((0,) * 4)
     max: None | Vec2 = None

@@ -1,9 +1,9 @@
 from .bordered_rect import BorderedRectangle
 from .dropdown import Dropdown
+from .style import Colours
 
-from interface.style import Colours, Sizing
 from framework import Frame, Mat2, Size, Position, Vec2, Pin
-from framework.components import Label
+from framework.components import Label, Text
 
 from pyglet.window import Window
 
@@ -26,10 +26,7 @@ class SettingsPage(BorderedRectangle):
         self.storage_manager = storage_manager
 
         super().__init__(
-            size=Size(
-                matrix=Mat2(),
-                constant=Vec2(1.0, 1.0) * -2 * Sizing.CONTENT_PADDING,
-            ),
+            size=Size(matrix=Mat2()),
             position=Position(),
             parent=parent,
         )
@@ -54,8 +51,9 @@ class SettingsPage(BorderedRectangle):
             input_device,
         )
 
-        self.help_label = Label(
-            "The pitch tracker likes harmonics, turn your tone knob up!",
+        self.help_text = Text(
+            """The pitch tracker likes harmonics, turn your tone knob up!
+P.S. Make sure to turn the volume of your mic/audio interface all the way up!""",
             colour=Colours.FOREGROUND,
             position=Position(
                 pin=Pin(
@@ -64,8 +62,10 @@ class SettingsPage(BorderedRectangle):
                 ),
                 offset=Vec2(0.0, 24.0),
             ),
+            size=Size(matrix=Mat2((1.0, 0.0, 0.0, 0.0))),
             parent=self,
             font_size=24,
+            align="center",
         )
 
     def on_input_device_assigned(self, option: str):

@@ -17,12 +17,13 @@ class FretboardExplorer(BorderedRectangle):
         self,
         window: Window,
         sound_manager: SoundManager,
-        size: Size,
-        position: Position,
         parent: Frame | None,
-        behind_parent: bool = False,
     ):
-        super().__init__(size, position, parent, behind_parent)
+        super().__init__(
+            size=Size(matrix=Mat2()),
+            position=Position(),
+            parent=parent,
+        )
 
         sound_manager.push_handlers(self)
 
@@ -101,11 +102,10 @@ Blue - Octave""",
         self.fretboard.clear_highlight()
         if offset is None:
             self.note_label.text = "Note: N/A"
-            return
+        else:
+            pitch = Pitch.from_offset(offset, Note.Mode.SHARPS)
+            self.note_label.text = f"Note: {pitch}"
 
-        pitch = Pitch.from_offset(offset, Note.Mode.SHARPS)
-        self.note_label.text = f"Note: {pitch}"
-
-        self.fretboard.highlight_pitch(pitch)
-        self.fretboard.highlight_octaves(pitch)
+            self.fretboard.highlight_pitch(pitch)
+            self.fretboard.highlight_octaves(pitch)
         self.rebuild()

@@ -1,4 +1,3 @@
-from operator import pos
 from engine import Pitch
 
 from framework import Frame, Size, Position, Pin, Vec2, Mat2
@@ -145,8 +144,6 @@ class Fretboard(Frame):
         )
 
     def clear_highlight(self):
-        for highlight in self.highlights:
-            highlight.parent = None
         self.highlights.clear()
 
     def highlight_pitch(
@@ -176,7 +173,7 @@ class Fretboard(Frame):
                 )
 
     def highlight_octaves(self, pitch: Pitch):
-        for i in range(0, 8):
+        for i in range(0, 6):
             if i != pitch.octave:
                 self.highlight_pitch(
                     Pitch(pitch.note, i),

@@ -8,6 +8,8 @@ from framework.update_hook import UpdateHook
 
 @dataclass
 class Position(UpdateHook):
+    """Position of a Frame relative to its parent. Defaults to the centre."""
+
     pin: Pin = field(default_factory=lambda: Pin.centre())
     offset: Vec2 = field(default_factory=lambda: Vec2())
 

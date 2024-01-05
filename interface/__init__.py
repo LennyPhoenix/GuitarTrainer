@@ -8,6 +8,7 @@ from .dropdown import Dropdown
 from .tuner import Tuner
 from .fretboard import Fretboard
 from .fretboard_explorer import FretboardExplorer
+from .stave import Stave, Clef
 
 
 __all__ = [
@@ -22,4 +23,6 @@ __all__ = [
     "Tuner",
     "Fretboard",
     "FretboardExplorer",
+    "Stave",
+    "Clef",
 ]

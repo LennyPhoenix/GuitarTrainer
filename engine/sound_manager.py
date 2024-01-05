@@ -190,10 +190,10 @@ class SoundManager(EventDispatcher):
             self.last_offset = offset
             self.last_offset_counter = 0
 
-        # Only broadcast to others if the offset has been the same for 3
+        # Only broadcast to others if the offset has been the same for 5
         # frames, and is different from the last *broadcasted* offset.
         if (
-            self.last_offset_counter >= 3
+            self.last_offset_counter >= 5
             and self.last_offset != self.broadcasted_offset
         ):
             self.broadcasted_offset = self.last_offset

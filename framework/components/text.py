@@ -14,6 +14,7 @@ class Text(Frame):
         parent: "Frame | None",
         font_size: int = 12,
         behind_parent: bool = False,
+        align: str = "left",
     ):
         self.label = Label(
             text=text,
@@ -23,6 +24,7 @@ class Text(Frame):
             width=1,
             multiline=True,
             anchor_y="top",
+            align=align,
             font_size=font_size,
         )
         super().__init__(size, position, parent, behind_parent)
