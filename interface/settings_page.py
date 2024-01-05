@@ -35,7 +35,7 @@ class SettingsPage(BorderedRectangle):
         )
 
         in_device = storage_manager.input_device
-        if in_device is None:
+        if in_device is None or in_device not in sound_manager.get_available_devices():
             in_device = "Please select"
         input_device = Dropdown(
             default=in_device,
@@ -52,6 +52,20 @@ class SettingsPage(BorderedRectangle):
         self.add_setting(
             "Input Device",
             input_device,
+        )
+
+        self.help_label = Label(
+            "The pitch tracker likes harmonics, turn your tone knob up!",
+            colour=Colours.FOREGROUND,
+            position=Position(
+                pin=Pin(
+                    local_anchor=Vec2(0.5, 0.0),
+                    remote_anchor=Vec2(0.5, 0.0),
+                ),
+                offset=Vec2(0.0, 24.0),
+            ),
+            parent=self,
+            font_size=24,
         )
 
     def on_input_device_assigned(self, option: str):
