@@ -123,7 +123,7 @@ class Fretboard(Frame):
                 lambda x: Rectangle(
                     colour=(128, 128, 128, 255),
                     size=Size(
-                        matrix=Mat2((1 / frets, 0.0, 0.0, 1.0)),
+                        matrix=Mat2((1 / (3 * frets), 0.0, 0.0, 1.0)),
                     ),
                     position=Position(
                         pin=Pin(
@@ -167,7 +167,7 @@ class Fretboard(Frame):
                         size=Size(constant=Vec2(32, 32)),
                         position=Position(
                             pin=Pin(
-                                local_anchor=Vec2(0.5, 0.5),
+                                local_anchor=Vec2(0.75, 0.5),
                                 remote_anchor=Vec2(x_pos, y_pos),
                             )
                         ),
