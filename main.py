@@ -61,6 +61,8 @@ class Root(Frame):
         self.lessons = Lessons(
             parent=self.content_container,
             window=self.window,
+            storage_manager=self.storage_manager,
+            sound_manager=self.sound_manager,
         )
 
         self.rebuild_groups()

@@ -4,6 +4,7 @@ from typing import TypedDict
 from copy import deepcopy
 
 from .instrument import Instrument
+from .progress import Progress
 
 
 class Config(TypedDict):
@@ -13,19 +14,29 @@ class Config(TypedDict):
 DEFAULT_CONFIG: Config = {"input_device": None}
 
 
-class InstrumentProgress(TypedDict):
-    string_progress: list[tuple[int, int]]
-    highest_note: tuple[int, int]
-    scales: dict[str, tuple[bool, bool]]
-    # TODO: Store lessons
+class ProgressData(TypedDict):
+    string_progress: list[tuple[int | None, int | None]]
+    highest_note: tuple[int | None, int | None]
+    scales: dict[str, tuple[bool, bool] | None]
 
 
-def gen_default(instrument: Instrument) -> InstrumentProgress:
-    return {
-        "string_progress": [(0, 0)] * len(instrument.value.strings),
-        "highest_note": (0, 0),
-        "scales": {},  # TODO
-    }
+InstrumentData = list[ProgressData]
+
+
+def gen_default_instrument(instrument: Instrument) -> InstrumentData:
+    return [
+        {
+            "string_progress": [(None, None)] * len(instrument.value.strings),
+            "highest_note": (None, None),
+            "scales": {
+                "major": None,
+                "minor": None,
+                "major_pentatonic": None,
+                "minor_pentatonic": None,
+                "blues": None,
+            },
+        }
+    ]
 
 
 class StorageManager:
@@ -57,74 +68,61 @@ class StorageManager:
             f"{instrument.value.name.lower()}.json",
         )
 
-    def _load_instrument(self, instrument: Instrument) -> InstrumentProgress:
+    def _load_instrument(self, instrument: Instrument) -> InstrumentData:
         instrument_file = self._instrument_file(instrument)
-        progress = gen_default(instrument)
+
+        instrument_data = gen_default_instrument(instrument)
+
         if path.exists(instrument_file):
             with open(instrument_file, "r") as f:
-                progress.update(json.load(f))
-        return progress
+                data = json.load(f)
+                if isinstance(data, list) and len(data) > 0:
+                    instrument_data = data
+
+        return instrument_data
 
     def _save_instrument(
         self,
         instrument: Instrument,
-        progress: InstrumentProgress,
+        progress: list[ProgressData],
     ):
         self._ensure_path()
         with open(self._instrument_file(instrument), "w") as f:
             json.dump(progress, f)
 
-    def get_string_progress(
+    def get_instrument_progress(
         self,
         instrument: Instrument,
-        string: int,
-    ) -> tuple[int, int]:
-        return self._load_instrument(instrument)["string_progress"][string]
-
-    def set_string_progress(
-        self,
-        instrument: Instrument,
-        string: int,
-        progress: tuple[int, int],
-    ):
-        instrument_progress = self._load_instrument(instrument)
-        instrument_progress["string_progress"][string] = progress
-        self._save_instrument(instrument, instrument_progress)
-
-    def get_highest_note(
-        self,
-        instrument: Instrument,
-    ) -> tuple[int, int]:
-        return self._load_instrument(instrument)["highest_note"]
-
-    def set_highest_note(
-        self,
-        instrument: Instrument,
-        note: tuple[int, int],
-    ):
-        instrument_progress = self._load_instrument(instrument)
-        instrument_progress["highest_note"] = note
-        self._save_instrument(instrument, instrument_progress)
-
-    def get_scale(
-        self,
-        instrument: Instrument,
-        scale: str,
-    ) -> tuple[bool, bool]:
-        return self._load_instrument(instrument)["scales"].get(
-            scale,
-            (False, False),
+    ) -> list[Progress]:
+        return list(
+            map(
+                lambda data: Progress(
+                    data["string_progress"],
+                    data["highest_note"],
+                    data["scales"],
+                ),
+                self._load_instrument(instrument),
+            )
         )
 
-    def set_scale(
+    def set_instrument_progress(
         self,
         instrument: Instrument,
-        scale: str,
-        value: tuple[bool, bool],
+        progress: list[Progress],
     ):
-        instrument_progress = self._load_instrument(instrument)
-        instrument_progress["scales"][scale] = value
-        self._save_instrument(instrument, instrument_progress)
+        self._save_instrument(
+            instrument,
+            list(
+                map(
+                    lambda p: {
+                        "string_progress": p.string_progress,
+                        "highest_note": p.highest_note,
+                        "scales": p.scales,
+                    },
+                    progress,
+                )
+            ),
+        )
 
     @property
     def input_device(self) -> str | None:

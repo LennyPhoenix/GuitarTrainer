@@ -146,6 +146,29 @@ class Fretboard(Frame):
     def clear_highlight(self):
         self.highlights.clear()
 
+    def highlight_fret(
+        self,
+        string: int,
+        fret: int,
+        colour: tuple[int, int, int, int] = (255, 0, 0, 255),
+    ):
+        if 0 <= string < len(self.string_pitches) and 0 <= fret <= self.fret_count:
+            x_pos = fret / self.fret_count
+            y_pos = string / (len(self.string_pitches) - 1)
+            self.highlights.append(
+                Rectangle(
+                    colour=colour,
+                    size=Size(constant=Vec2(32, 32)),
+                    position=Position(
+                        pin=Pin(
+                            local_anchor=Vec2(0.75, 0.5),
+                            remote_anchor=Vec2(x_pos, y_pos),
+                        )
+                    ),
+                    parent=self.highlights_container,
+                )
+            )
+
     def highlight_pitch(
         self,
         pitch: Pitch,

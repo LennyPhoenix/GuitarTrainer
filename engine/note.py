@@ -85,6 +85,9 @@ class Note:
     def __str__(self) -> str:
         return f"{self.name}{self.accidental}"
 
+    def __hash__(self) -> int:
+        return hash((self.name, self.accidental))
+
     @property
     def offset(self) -> int:
         """The offset of this note from A."""
@@ -112,6 +115,9 @@ class Pitch:
 
     def __str__(self) -> str:
         return f"{self.note}{self.octave}"
+
+    def __hash__(self) -> int:
+        return hash((self.note, self.octave))
 
     @property
     def offset(self) -> int:

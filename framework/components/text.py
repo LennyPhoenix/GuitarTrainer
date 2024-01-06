@@ -26,6 +26,7 @@ class Text(Frame):
             anchor_y="top",
             align=align,
             font_size=font_size,
+            font_name="Noto Sans",
         )
         super().__init__(size, position, parent, behind_parent)
 

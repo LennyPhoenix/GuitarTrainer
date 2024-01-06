@@ -15,6 +15,9 @@ from .note import (
 )
 
 from .instrument import Instrument
+from .lesson import Lesson
+from .exercise import Exercise
+from .progress import Progress
 
 __all__ = [
     "SoundManager",
@@ -29,4 +32,7 @@ __all__ = [
     "offset_to_frequency",
     "Clef",
     "Instrument",
+    "Lesson",
+    "Exercise",
+    "Progress",
 ]
