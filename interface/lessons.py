@@ -12,6 +12,7 @@ from engine import (
     Pitch,
     Note,
     SoundManager,
+    Name,
 )
 from engine.note import Accidental
 
@@ -632,9 +633,15 @@ class LessonInterface(Frame, EventDispatcher):
 
                 self.content.append(question)
                 self.content.append(help_text)
+
+                if exercise.pitch.note.name in [Name.A, Name.E, Name.F]:
+                    determinant = "an"
+                else:
+                    determinant = "a"
+
                 if exercise.hint:
                     hint = Label(
-                        text=f"(It is a {exercise.pitch})",
+                        text=f"(It is {determinant} {exercise.pitch})",
                         colour=Colours.FOREGROUND,
                         position=Position(),
                         parent=self.hint,
