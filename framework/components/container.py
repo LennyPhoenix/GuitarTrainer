@@ -23,7 +23,11 @@ class ScissorGroup(Group):
             self.previous_state = None
 
         gl.glEnable(gl.GL_SCISSOR_TEST)
-        gl.glScissor(*round(self.aabb.position), *round(self.aabb.size))
+        if self.previous_state is None:
+            aabb = self.aabb
+        else:
+            aabb = self.previous_state.intersection(self.aabb)
+        gl.glScissor(*round(aabb.position), *round(aabb.size))
 
     def unset_state(self):
         if self.previous_state is None:

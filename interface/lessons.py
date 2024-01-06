@@ -70,7 +70,7 @@ def fret_exercises(
                 ]
             )
         )
-        to_add *= 1
+        to_add *= 3
         return to_add
 
     return []
@@ -157,8 +157,8 @@ def determine_next_target(
             )
     if highest_note_offset != -1:
         if (
-            current.highest_note[1] is None
-            or current.highest_note[1] < highest_note_offset
+            current.highest_note[0] is None
+            or current.highest_note[0] < highest_note_offset
         ):
             target.highest_note = (highest_note_offset, None)
             new_topic = True
@@ -181,6 +181,7 @@ def determine_next_target(
                 break
         fret_target += 2
 
+    # Teach Scales
     top_string = current.string_progress[-1][1]
     if not new_topic and top_string is not None and top_string >= 12:
         for scale, progress in current.scales.items():
@@ -266,6 +267,7 @@ class LessonButton(BorderedRectangle, EventDispatcher):
         parent: Frame | None,
         window: Window,
         lesson: Lesson,
+        complete: bool,
     ):
         super().__init__(
             position=position,
@@ -275,6 +277,7 @@ class LessonButton(BorderedRectangle, EventDispatcher):
         )
 
         self.lesson = lesson
+        self.complete = complete
 
         self.play_button = ImageButton(
             window=window,
@@ -303,19 +306,41 @@ class LessonButton(BorderedRectangle, EventDispatcher):
             position=Position(pin=Pin.top_left(), offset=Vec2(8, 0)),
             parent=self.info.content,
         )
+
+        exercises: dict[tuple[Exercise.Type, bool], int] = {}
+
+        for exercise in set(lesson.exercises):
+            if (exercise.type, exercise.hint) not in exercises:
+                exercises[(exercise.type, exercise.hint)] = 0
+            exercises[(exercise.type, exercise.hint)] += 1
+
+        pretty = ""
+        for key, value in exercises.items():
+            modifier = "NEW" if key[1] else "practice for"
+
+            match key[0]:
+                case Exercise.Type.NOTE_NAME:
+                    name = "Note Names"
+                case Exercise.Type.STAVE_NOTE:
+                    name = "Stave Notes"
+                case Exercise.Type.SCALE:
+                    name = "Scales"
+
+            pretty += f"- {value} {modifier} {name}\n"
+
         self.text = Text(
-            # TODO: Pretty print the exercises. Maybe convert to set?
-            text=repr(lesson),
+            text=pretty,
             colour=Colours.FOREGROUND,
             size=Size(
                 matrix=Mat2((1.0, 0.0, 0.0, 0.0)),
             ),
             position=Position(pin=Pin.top_left(), offset=Vec2(8, -48 - 18)),
             parent=self.info.content,
+            font_size=24,
         )
 
     def on_button_pressed(self):
-        self.dispatch_event("on_started", self.lesson)
+        self.dispatch_event("on_started", self.lesson, self.complete)
 
 
 LessonButton.register_event_type("on_started")
@@ -335,6 +360,8 @@ class LessonSelection(ScrollContainer, EventDispatcher):
         self.storage = storage_manager
         self.window = window
 
+        self.register(window)
+
         super().__init__(
             size=Size(matrix=Mat2()),
             position=Position(),
@@ -351,7 +378,7 @@ class LessonSelection(ScrollContainer, EventDispatcher):
                 pin=Pin.top_left(),
                 offset=Vec2(18.0, -18.0),
             ),
-            parent=self,
+            parent=self.content,
             elements=lambda: [i.value.name for i in Instrument],
         )
         self.dropdown.set_handler("on_picked", self.on_dropdown_picked)
@@ -373,7 +400,7 @@ class LessonSelection(ScrollContainer, EventDispatcher):
 
         for i, progress_snapshot in enumerate(instrument_progress):
             if i == 0:
-                parent = self
+                parent = self.content
                 position = Position(
                     pin=Pin(
                         local_anchor=Vec2(0.5, 1.0),
@@ -393,7 +420,8 @@ class LessonSelection(ScrollContainer, EventDispatcher):
                 )
                 matrix = Mat2((1.0, 0.0, 0.0, 0.0))
 
-            if i == len(instrument_progress) - 1:
+            complete = i < len(instrument_progress) - 1
+            if not complete:
                 target_progress = determine_next_target(
                     progress_snapshot,
                     instrument,
@@ -417,14 +445,29 @@ class LessonSelection(ScrollContainer, EventDispatcher):
                 ),
                 window=self.window,
                 lesson=lesson,
+                complete=complete,
             )
             lesson_button.set_handler("on_started", self.on_lesson_started)
             self.lessons.append(lesson_button)
 
+        # Padding
+        self.lessons.append(
+            Frame(
+                size=Size(constant=Vec2(0, 64)),
+                position=Position(
+                    pin=Pin(
+                        local_anchor=Vec2(0.0, 1.0),
+                        remote_anchor=Vec2(0.0, 0.0),
+                    )
+                ),
+                parent=self.lessons[-1],
+            )
+        )
+
         self.rebuild()
 
-    def on_lesson_started(self, lesson: Lesson):
-        self.dispatch_event("on_started", lesson)
+    def on_lesson_started(self, lesson: Lesson, complete: bool):
+        self.dispatch_event("on_started", lesson, complete)
 
 
 EventDispatcher.register_event_type("on_instrument_change")
@@ -437,6 +480,7 @@ class LessonInterface(Frame, EventDispatcher):
         sound_manager: SoundManager,
         instrument: Instrument,
         lesson: Lesson,
+        window: Window,
         parent: Frame | None,
         exercise: int = 0,
     ):
@@ -451,6 +495,29 @@ class LessonInterface(Frame, EventDispatcher):
             size=Size(matrix=Mat2()),
             position=Position(),
             parent=parent,
+        )
+
+        self.close_button = ImageButton(
+            image("assets/close.png"),
+            position=Position(
+                pin=Pin.top_right(),
+                offset=Vec2(-18, -18),
+            ),
+            size=Size(constant=Vec2(64, 64)),
+            window=window,
+            parent=self,
+        )
+        self.close_button.set_handler("on_released", self.on_close_button_pressed)
+
+        self.question_number = Label(
+            text="",
+            colour=Colours.FOREGROUND,
+            position=Position(
+                pin=Pin.top_left(),
+                offset=Vec2(18, -18),
+            ),
+            font_size=24,
+            parent=self,
         )
 
         self.question_no_hint = Frame(
@@ -493,6 +560,7 @@ class LessonInterface(Frame, EventDispatcher):
         self.content.clear()
         exercise = self.lesson.exercises[self.exercise]
 
+        self.question_number.text = f"{self.exercise + 1}/{len(self.lesson.exercises)}"
         match exercise.type:
             case Exercise.Type.NOTE_NAME:
                 assert exercise.string is not None
@@ -501,7 +569,7 @@ class LessonInterface(Frame, EventDispatcher):
                     colour=Colours.FOREGROUND,
                     size=Size(matrix=Mat2((1.0, 0.0, 0.0, 0.0))),
                     position=Position(),
-                    align="centre",
+                    align="center",
                     parent=self.question_hint
                     if exercise.hint
                     else self.question_no_hint,
@@ -528,10 +596,25 @@ class LessonInterface(Frame, EventDispatcher):
                     )
                     self.content.append(hint)
             case Exercise.Type.STAVE_NOTE:
+                help_text = Text(
+                    "Play the following note:",
+                    colour=Colours.FOREGROUND,
+                    position=Position(
+                        pin=Pin(
+                            local_anchor=Vec2(0.5, 1.0),
+                            remote_anchor=Vec2(0.5, 1.0),
+                        ),
+                        offset=Vec2(0.0, -32.0),
+                    ),
+                    size=Size(matrix=Mat2((1.0, 0.0, 0.0, 0.0))),
+                    align="center",
+                    parent=self,
+                    font_size=32,
+                )
                 question = Stave(
                     clef=self.instrument.value.clef,
                     size=Size(matrix=Mat2()),
-                    position=Position(),
+                    position=Position(offset=Vec2(0.0, -32.0)),
                     parent=self.question_hint
                     if exercise.hint
                     else self.question_no_hint,
@@ -548,9 +631,10 @@ class LessonInterface(Frame, EventDispatcher):
                 question.show_pitch(pitch)
 
                 self.content.append(question)
+                self.content.append(help_text)
                 if exercise.hint:
                     hint = Label(
-                        text=f"Play this note, it is a {exercise.pitch}",
+                        text=f"(It is a {exercise.pitch})",
                         colour=Colours.FOREGROUND,
                         position=Position(),
                         parent=self.hint,
@@ -564,13 +648,20 @@ class LessonInterface(Frame, EventDispatcher):
         if offset == self.lesson.exercises[self.exercise].pitch.offset:
             self.exercise += 1
             if self.exercise < len(self.lesson.exercises):
+                self.dispatch_event("on_next_exercise", self.exercise)
                 self.show()
             else:
                 self.sound.remove_handlers(self)
                 self.dispatch_event("on_finished")
 
+    def on_close_button_pressed(self):
+        self.sound.remove_handlers(self)
+        self.dispatch_event("on_close")
+
 
 LessonInterface.register_event_type("on_finished")
+LessonInterface.register_event_type("on_next_exercise")
+LessonInterface.register_event_type("on_close")
 
 
 class Lessons(Frame):
@@ -584,6 +675,7 @@ class Lessons(Frame):
     instrument: Instrument = LessonSelection.DEFAULT_INSTRUMENT
 
     lesson: Lesson | None = None
+    complete: bool = True  # whether this is an old lesson or not
     exercise: int = 0
 
     def __init__(
@@ -624,12 +716,19 @@ class Lessons(Frame):
                     sound_manager=self.sound,
                     instrument=self.instrument,
                     lesson=self.lesson,
+                    exercise=self.exercise,
                     parent=self,
+                    window=self.window,
                 )
                 self.content.set_handler(
                     "on_finished",
                     self.on_lesson_finished,
                 )
+                self.content.set_handler(
+                    "on_next_exercise",
+                    self.on_next_exercise,
+                )
+                self.content.set_handler("on_close", self.on_lesson_closed)
 
         self.rebuild()
 
@@ -640,16 +739,31 @@ class Lessons(Frame):
     def on_instrument_change(self, instrument: Instrument):
         self.instrument = instrument
 
-    def on_lesson_started(self, lesson: Lesson):
+    def on_lesson_started(self, lesson: Lesson, complete: bool):
         self.lesson = lesson
+        self.complete = complete
         self.current_mode = self.Mode.LESSON
         self.show()
 
     def on_lesson_finished(self):
         assert self.lesson is not None
-        progress = self.storage.get_instrument_progress(self.instrument)
-        progress.append(self.lesson.target_progress)
+
+        if not self.complete:
+            progress = self.storage.get_instrument_progress(self.instrument)
+            progress.append(self.lesson.target_progress)
+            self.storage.set_instrument_progress(self.instrument, progress)
+
         self.lesson = None
-        self.storage.set_instrument_progress(self.instrument, progress)
+        self.exercise = 0
+        self.complete = True
+        self.current_mode = self.Mode.SELECTION
+        self.show()
+
+    def on_next_exercise(self, exercise: int):
+        self.exercise = exercise
+
+    def on_lesson_closed(self):
+        self.lesson = None
+        self.exercise = 0
         self.current_mode = self.Mode.SELECTION
         self.show()

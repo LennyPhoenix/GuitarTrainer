@@ -29,7 +29,13 @@ class Aabb:
     def from_left_right_bottom_top(
         left: float, right: float, bottom: float, top: float
     ) -> "Aabb":
-        return Aabb(Vec2(left, bottom), Vec2(right - left, top - bottom))
+        return Aabb(
+            Vec2(left, bottom),
+            Vec2(
+                max(right - left, 0.0),
+                max(top - bottom, 0.0),
+            ),
+        )
 
     def check_point(self, point: Vec2) -> bool:
         return (
@@ -37,12 +43,20 @@ class Aabb:
             and self.position.y < point.y < self.position.y + self.size.y
         )
 
-    def union(self, other: Self) -> Self:
+    def union(self, other: "Aabb") -> "Aabb":
         return Aabb.from_left_right_bottom_top(
             min(self.left, other.left),
             max(self.right, other.right),
             min(self.bottom, other.bottom),
             max(self.top, other.top),
+        )
+
+    def intersection(self, other: "Aabb") -> "Aabb":
+        return Aabb.from_left_right_bottom_top(
+            max(self.left, other.left),
+            min(self.right, other.right),
+            max(self.bottom, other.bottom),
+            min(self.top, other.top),
         )
 
     def __repr__(self) -> str:
