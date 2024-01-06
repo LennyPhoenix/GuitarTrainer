@@ -50,7 +50,7 @@ class Accidental(Enum):
 @dataclass
 class Note:
     name: Name
-    accidental: Accidental
+    accidental: Accidental = Accidental.NATURAL
 
     class Mode(Enum):
         SHARPS = auto()
@@ -172,10 +172,7 @@ class TestNotes:
         assert offset_to_octave(3) == 5
 
     def test_offset_to_note(self):
-        assert Note.from_offset(0, Note.Mode.SHARPS) == Note(
-            Name.A,
-            Accidental.NATURAL,
-        )
+        assert Note.from_offset(0, Note.Mode.SHARPS) == Note(Name.A)
 
         # Enharmonic Test
         assert Note.from_offset(1, Note.Mode.SHARPS) == Note(
@@ -209,13 +206,7 @@ class TestNotes:
         assert Pitch.from_offset(
             frequency_to_offset(440),
             Note.Mode.SHARPS,
-        ) == Pitch(
-            Note(
-                Name.A,
-                Accidental.NATURAL,
-            ),
-            4,
-        )
+        ) == Pitch(Note(Name.A), 4)
 
         # Enharmonic Test
         assert Pitch.from_offset(

@@ -1,6 +1,6 @@
 from .bordered_rect import BorderedRectangle
 from .dropdown import Dropdown
-from .style import Colours
+from .style import Colours, Sizing
 
 from framework import Frame, Mat2, Size, Position, Vec2, Pin
 from framework.components import Label, Text
@@ -26,7 +26,10 @@ class SettingsPage(BorderedRectangle):
         self.storage_manager = storage_manager
 
         super().__init__(
-            size=Size(matrix=Mat2()),
+            size=Size(
+                matrix=Mat2(),
+                constant=-Vec2(1.0, 1.0) * 2 * Sizing.CONTENT_PADDING,
+            ),
             position=Position(),
             parent=parent,
         )

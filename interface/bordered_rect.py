@@ -12,7 +12,6 @@ class BorderedRectangle(Rectangle):
         parent: Frame | None,
         behind_parent: bool = False,
     ):
-        size.constant -= Vec2(Sizing.BORDER_SIZE, Sizing.BORDER_SIZE) * 2
         super().__init__(
             size=size,
             position=position,

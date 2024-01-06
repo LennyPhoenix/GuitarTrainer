@@ -1,5 +1,5 @@
 from pyglet.window import Window
-from engine import GUITAR_STRINGS, BASS_STRINGS, Pitch, Note
+from engine import Instrument, Pitch, Note
 
 from framework import Frame, Size, Pin, Position, Mat2, Vec2
 from framework.components import Label, Text
@@ -8,11 +8,13 @@ from engine import SoundManager
 
 from .fretboard import Fretboard
 from .dropdown import Dropdown
-from .style import Colours
+from .style import Colours, Sizing
 from .bordered_rect import BorderedRectangle
 
 
 class FretboardExplorer(BorderedRectangle):
+    DEFAULT = Instrument.GUITAR
+
     def __init__(
         self,
         window: Window,
@@ -20,7 +22,10 @@ class FretboardExplorer(BorderedRectangle):
         parent: Frame | None,
     ):
         super().__init__(
-            size=Size(matrix=Mat2()),
+            size=Size(
+                matrix=Mat2(),
+                constant=-Vec2(1.0, 1.0) * 2 * Sizing.CONTENT_PADDING,
+            ),
             position=Position(),
             parent=parent,
         )
@@ -28,7 +33,7 @@ class FretboardExplorer(BorderedRectangle):
         sound_manager.push_handlers(self)
 
         self.dropdown = Dropdown(
-            default="Guitar",
+            default=self.DEFAULT.value.name,
             window=window,
             size=Size(
                 constant=Vec2(256, 64),
@@ -38,7 +43,7 @@ class FretboardExplorer(BorderedRectangle):
                 offset=Vec2(18.0, -18.0),
             ),
             parent=self,
-            elements=lambda: ["Guitar", "Bass"],
+            elements=lambda: [i.value.name for i in Instrument],
         )
         self.dropdown.set_handler("on_picked", self.on_dropdown_picked)
 
@@ -72,7 +77,7 @@ Blue - Octave""",
             font_size=32,
         )
 
-        self.construct_fretboard(GUITAR_STRINGS)
+        self.construct_fretboard(self.DEFAULT.value.strings)
 
     def construct_fretboard(self, strings: list[Pitch]):
         self.fretboard = Fretboard(
@@ -93,10 +98,10 @@ Blue - Octave""",
 
     def on_dropdown_picked(self, option: str):
         match option:
-            case "Guitar":
-                self.construct_fretboard(GUITAR_STRINGS)
-            case "Bass":
-                self.construct_fretboard(BASS_STRINGS)
+            case Instrument.GUITAR.value.name:
+                self.construct_fretboard(Instrument.GUITAR.value.strings)
+            case Instrument.BASS.value.name:
+                self.construct_fretboard(Instrument.BASS.value.strings)
 
     def on_new_offset(self, offset: int | None):
         self.fretboard.clear_highlight()

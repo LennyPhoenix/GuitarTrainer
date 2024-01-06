@@ -1,6 +1,4 @@
-from enum import Enum
-
-from engine import Pitch, Note, Name, Accidental
+from engine import Pitch, Note, Name, Accidental, Clef
 
 from framework import Frame, Vec2, Size, Position
 from framework.components import Label
@@ -27,11 +25,6 @@ def note_position(note: Name) -> int:
             return 5
         case Name.B:
             return 6
-
-
-class Clef(Enum):
-    TREBLE = "𝄞"
-    BASS = "𝄢"
 
 
 class MusicSymbol(Label):
@@ -84,10 +77,10 @@ class Stave(Frame):
 
         match clef:
             case Clef.TREBLE:
-                self.middle_note = Pitch(Note(Name.B, Accidental.NATURAL), 4)
+                self.middle_note = Pitch(Note(Name.B), 4)
                 y = 0.0
             case Clef.BASS:
-                self.middle_note = Pitch(Note(Name.D, Accidental.NATURAL), 3)
+                self.middle_note = Pitch(Note(Name.D), 3)
                 y = 0.125
 
         self.clef = MusicSymbol(
@@ -126,13 +119,15 @@ class Stave(Frame):
                         "𝄖",
                         position=Position(
                             offset=Vec2(
-                                0.5, -((i+3) * ledger_direction * 2 * NOTE_SPACE)
+                                0.5, -((i + 3) * ledger_direction *
+                                       2 * NOTE_SPACE)
                             )
                         ),
                         parent=self,
                     )
                 )
 
-            self.note.position.offset = Vec2(0.5, 0.5 - NOTE_SPACE * difference) * SIZE
+            self.note.position.offset = Vec2(
+                0.5, 0.5 - NOTE_SPACE * difference) * SIZE
 
         self.rebuild()

@@ -9,8 +9,9 @@ from engine import (
     offset_to_frequency,
     frequency_to_offset_unrounded,
 )
+
 from interface import BorderedRectangle
-from interface.style import Colours
+from interface.style import Colours, Sizing
 
 
 class Tuner(BorderedRectangle):
@@ -20,7 +21,10 @@ class Tuner(BorderedRectangle):
         parent: Frame | None,
     ):
         super().__init__(
-            size=Size(matrix=Mat2()),
+            size=Size(
+                matrix=Mat2(),
+                constant=-Vec2(1.0, 1.0) * 2 * Sizing.CONTENT_PADDING,
+            ),
             position=Position(),
             parent=parent,
         )

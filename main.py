@@ -10,10 +10,10 @@ from framework import Frame, Size, Pin, Position
 from framework.components import Rectangle, Container
 from framework.mat2 import Mat2
 
-from interface import MenuBar, SettingsPage, View, Tuner, FretboardExplorer, Stave, Clef
+from interface import MenuBar, SettingsPage, View, Tuner, FretboardExplorer, Lessons
 from interface.style import Colours, Sizing
 
-from engine import SoundManager, StorageManager, Pitch, Note
+from engine import SoundManager, StorageManager
 
 
 class Root(Frame):
@@ -52,35 +52,15 @@ class Root(Frame):
         self.content_container = Container(
             size=Size(
                 matrix=Mat2(),
-                constant=Vec2(
-                    -Sizing.CONTENT_PADDING * 2,
-                    -(Sizing.CONTENT_PADDING * 2 + Sizing.TOP_BAR),
-                ),
+                constant=Vec2(0.0, -Sizing.TOP_BAR),
             ),
-            position=Position(
-                pin=Pin.centre(),
-                offset=Vec2(0.0, -Sizing.TOP_BAR / 2),
-            ),
+            position=Position(pin=Pin.bottom_left()),
             parent=self,
         )
 
-        self.stave = Stave(
-            clef=Clef.BASS,
-            size=Size(matrix=Mat2()),
-            position=Position(),
+        self.lessons = Lessons(
             parent=self.content_container,
-        )
-
-        self.sound_manager.set_handler(
-            "on_new_offset",
-            lambda offset: self.stave.show_pitch(
-                Pitch.from_offset(
-                    offset,
-                    Note.Mode.FLATS,
-                )
-                if offset is not None
-                else None,
-            ),
+            window=self.window,
         )
 
         self.rebuild_groups()
@@ -113,6 +93,11 @@ class Root(Frame):
             )
         else:
             self.fretboard = None
+
+        if view == View.APP:
+            self.lessons.show()
+        else:
+            self.lessons.hide()
 
         self.rebuild()
 
