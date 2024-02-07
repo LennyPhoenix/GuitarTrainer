@@ -16,7 +16,7 @@ from .note import (
 
 from .instrument import Instrument
 from .lesson import Lesson
-from .exercise import Exercise
+from .exercise import Exercise, fret_exercises, stave_exercises
 from .progress import Progress
 
 __all__ = [
@@ -34,5 +34,7 @@ __all__ = [
     "Instrument",
     "Lesson",
     "Exercise",
+    "fret_exercises",
+    "stave_exercises",
     "Progress",
 ]
