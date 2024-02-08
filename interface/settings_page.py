@@ -124,6 +124,7 @@ P.S. Make sure to turn the volume of your mic/audio interface all the way up!"""
                 offset=Vec2(-24.0, 0.0),
             ),
             parent=container,
+            font_size=18,
         )
 
         component.size = Size(

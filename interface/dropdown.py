@@ -161,6 +161,7 @@ class Dropdown(BorderedRectangle, EventDispatcher):
             colour=Colours.FOREGROUND,
             position=Position(pin=Pin.centre()),
             parent=self,
+            font_size=18
         )
 
     def on_button_state_change(

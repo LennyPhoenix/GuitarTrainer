@@ -1,6 +1,4 @@
-from copy import deepcopy
 from enum import Enum, auto
-from random import shuffle
 
 from pyglet.event import EventDispatcher
 from engine import (
@@ -10,8 +8,6 @@ from engine import (
     Progress,
     Exercise,
     SoundManager,
-    fret_exercises,
-    stave_exercises,
 )
 
 from framework import Frame, Position, Size, Mat2, Vec2, Pin
@@ -26,146 +22,6 @@ from .scroll_container import ScrollContainer
 from .image_button import ImageButton
 from .dropdown import Dropdown
 from .lesson_interface import LessonInterface
-
-
-def determine_next_target(
-    current: Progress,
-    instrument: Instrument,
-) -> Progress:
-    target = deepcopy(current)
-
-    # Test Knowledge
-    for i, progress in enumerate(current.string_progress):
-        if progress[0] is not None:
-            if progress[1] is None or progress[0] > progress[1]:
-                target.string_progress[i] = (progress[0], progress[0])
-    if current.highest_note[0] is not None:
-        if (
-            current.highest_note[1] is None
-            or current.highest_note[0] > current.highest_note[1]
-        ):
-            target.highest_note = (
-                current.highest_note[0],
-                current.highest_note[0],
-            )
-    for scale, progress in current.scales.items():
-        if progress is not None and progress[0] and not progress[1]:
-            target.scales[scale] = (progress[0], progress[0])
-
-    new_topic = False
-
-    # Teach Stave
-    highest_note_offset = -1
-    for i, progress in enumerate(current.string_progress):
-        if progress[1] is not None:
-            highest_note_offset = max(
-                highest_note_offset,
-                progress[1]
-                + instrument.value.strings[i].offset
-                - instrument.value.lowest_pitch.offset,
-            )
-    if highest_note_offset != -1:
-        if (
-            current.highest_note[0] is None
-            or current.highest_note[0] < highest_note_offset
-        ):
-            target.highest_note = (highest_note_offset, None)
-            new_topic = True
-
-    # Teach Note Names
-    fret_target = 5
-    while not new_topic and fret_target < 24:
-        for i, progress in enumerate(current.string_progress):
-            if i == 0:
-                prev_string_learnt = True
-            else:
-                prev_progress = current.string_progress[i - 1][1]
-                prev_string_learnt = (
-                    prev_progress is not None and prev_progress >= fret_target
-                )
-
-            if progress[0] is None and prev_string_learnt:
-                target.string_progress[i] = (fret_target, None)
-                new_topic = True
-                break
-        fret_target += 2
-
-    # Teach Scales
-    top_string = current.string_progress[-1][1]
-    if not new_topic and top_string is not None and top_string >= 12:
-        for scale, progress in current.scales.items():
-            if progress is None or not progress[0]:
-                target.scales[scale] = (True, False)
-                new_topic = True
-                break
-
-    return target
-
-
-def determine_lesson_from_progress(
-    index: int,
-    last: Progress,
-    target: Progress,
-    instrument: Instrument,
-) -> Lesson:
-    exercises = []
-
-    # Fret exercises
-    for string_index, string_target in enumerate(target.string_progress):
-        string = instrument.value.strings[string_index]
-        string_last = last.string_progress[string_index]
-        if string_target[0] != string_last[0]:
-            # A string was taught
-            exercises += fret_exercises(
-                string_last[0],
-                string_target[0],
-                string,
-                teaching=True,
-            )
-
-        if string_target[1] != string_last[1]:
-            # A string was tested
-            exercises += fret_exercises(
-                string_last[1],
-                string_target[1],
-                string,
-                teaching=False,
-            )
-
-    # Stave exercises
-    if target.highest_note[0] != last.highest_note[0]:
-        # A new note was taught
-        exercises += stave_exercises(
-            last.highest_note[0],
-            target.highest_note[0],
-            instrument,
-        )
-    if target.highest_note[1] != last.highest_note[1]:
-        # A new note was tested
-        exercises += stave_exercises(
-            last.highest_note[1],
-            target.highest_note[1],
-            instrument,
-            teaching=False,
-        )
-
-    for scale_name, scale_progress in target.scales.items():
-        last_progress = last.scales[scale_name]
-        if scale_progress is not None and last_progress is not None:
-            if scale_progress[0] != last_progress[0]:
-                # A new scale was taught
-                pass
-            if scale_progress[1] != last_progress[1]:
-                # A new scale was tested
-                pass
-
-    shuffle(exercises)
-
-    return Lesson(
-        number=index + 1,
-        exercises=exercises,
-        target_progress=target,
-    )
 
 
 class LessonButton(BorderedRectangle, EventDispatcher):
@@ -281,7 +137,7 @@ class LessonSelection(ScrollContainer, EventDispatcher):
             default=instrument.value.name,
             window=window,
             size=Size(
-                constant=Vec2(256, 64),
+                constant=Vec2(128, 64),
             ),
             position=Position(
                 pin=Pin.top_left(),
@@ -331,14 +187,14 @@ class LessonSelection(ScrollContainer, EventDispatcher):
 
             complete = i < len(instrument_progress) - 1
             if not complete:
-                target_progress = determine_next_target(
+                target_progress = Progress.next_target(
                     progress_snapshot,
                     instrument,
                 )
             else:
                 target_progress = instrument_progress[i + 1]
 
-            lesson = determine_lesson_from_progress(
+            lesson = Lesson.new_from_progress(
                 i,
                 progress_snapshot,
                 target_progress,
