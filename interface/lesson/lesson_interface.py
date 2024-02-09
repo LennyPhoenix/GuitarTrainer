@@ -1,7 +1,5 @@
-from .fretboard import Fretboard
-from .stave import Stave
-from .image_button import ImageButton
-from .style import Colours
+from interface import Fretboard, Stave, ImageButton
+from interface.style import Colours
 
 from engine import (
     Accidental,

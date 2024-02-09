@@ -9,8 +9,7 @@ from .tuner import Tuner
 from .fretboard import Fretboard
 from .fretboard_explorer import FretboardExplorer
 from .stave import Stave, Clef
-from .lessons import Lessons
-from .lesson_interface import LessonInterface
+from .lesson import Lessons
 
 
 __all__ = [
@@ -28,5 +27,4 @@ __all__ = [
     "Stave",
     "Clef",
     "Lessons",
-    "LessonInterface",
 ]

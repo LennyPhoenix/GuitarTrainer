@@ -1,5 +1,7 @@
 import gc
 
+from pyglet.image import Texture
+from pyglet.gl import GL_NEAREST
 from pyglet.app import run
 from pyglet.clock import schedule_once, unschedule
 from pyglet.math import Vec2
@@ -14,6 +16,10 @@ from interface import MenuBar, SettingsPage, View, Tuner, FretboardExplorer, Les
 from interface.style import Colours, Sizing
 
 from engine import SoundManager, StorageManager
+
+
+Texture.default_mag_filter = GL_NEAREST
+Texture.default_min_filter = GL_NEAREST
 
 
 class Root(Frame):
