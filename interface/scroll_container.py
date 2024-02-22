@@ -2,13 +2,14 @@ from framework.components import Container, Rectangle, Button
 from framework import Size, Position, Frame, Mat2, Vec2, Pin
 from .style import Colours
 
-from pyglet.window import Window
+from pyglet.window import Window, mouse
 
 
 class ScrollContainer(Container):
     SCROLL_BAR_SIZE = 24
 
     content: Frame | None = None
+    dragging: bool = False
 
     def __init__(
         self,
@@ -101,7 +102,47 @@ class ScrollContainer(Container):
     def register(self, window: Window):
         window.push_handlers(self)
 
-    def on_mouse_scroll(self, x: float, y: float, _scroll_x: float, scroll_y: float):
+    def on_mouse_press(self, x, y, buttons, _modifiers):
+        if (
+            buttons == mouse.LEFT
+            and self.scroll_button.aabb.check_point(Vec2(x, y))
+            and self.content is not None
+        ):
+            self.dragging = True
+
+    def on_mouse_release(self, *_args):
+        self.dragging = False
+
+    def on_mouse_drag(
+        self,
+        _x: float,
+        _y: float,
+        _dx: float,
+        dy: float,
+        _buttons: int,
+        _modifiers: int,
+    ):
+        if self.dragging and self.content is not None:
+            self.content.position.offset = Vec2(
+                0.0,
+                min(
+                    max(
+                        self.content.position.offset.y
+                        - (dy / self.scroll_bar.aabb.size.y) * self.content.aabb.size.y,
+                        0.0,
+                    ),
+                    self.content.broad_phase_aabb.size.y - self.content.aabb.size.y,
+                ),
+            )
+            self.refresh_bar()
+
+    def on_mouse_scroll(
+        self,
+        x: float,
+        y: float,
+        _scroll_x: float,
+        scroll_y: float,
+    ):
         if self.aabb.check_point(Vec2(x, y)) and self.content is not None:
             self.content.position.offset = Vec2(
                 0.0,
