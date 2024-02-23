@@ -105,7 +105,7 @@ class ScrollContainer(Container):
     def on_mouse_press(self, x, y, buttons, _modifiers):
         if (
             buttons == mouse.LEFT
-            and self.scroll_button.aabb.check_point(Vec2(x, y))
+            and self.scroll_bar.aabb.check_point(Vec2(x, y))
             and self.content is not None
         ):
             self.dragging = True
@@ -128,7 +128,8 @@ class ScrollContainer(Container):
                 min(
                     max(
                         self.content.position.offset.y
-                        - (dy / self.scroll_bar.aabb.size.y) * self.content.aabb.size.y,
+                        - (dy / self.scroll_bar.aabb.size.y)
+                        * self.content.broad_phase_aabb.size.y,
                         0.0,
                     ),
                     self.content.broad_phase_aabb.size.y - self.content.aabb.size.y,

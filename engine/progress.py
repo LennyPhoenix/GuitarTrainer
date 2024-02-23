@@ -31,7 +31,7 @@ def test_user(target: "Progress", current: "Progress"):
 def teach_stave(
     target: "Progress", current: "Progress", instrument: Instrument
 ) -> bool:
-    """Adds new notes on the fretboard to teach the user, returns True if any
+    """Adds new notes on the stave to teach the user, returns True if any
     new notes are being taught.
     """
     highest_note_offset = -1
@@ -69,29 +69,10 @@ def teach_frets(target: "Progress", current: "Progress") -> bool:
                     prev_progress is not None and prev_progress >= fret_target
                 )
 
-            if progress[0] is None and prev_string_learnt:
-                target.string_progress[i] = (fret_target, None)
-                return True
-        fret_target += 2
-    return False
+            if not prev_string_learnt:
+                return False
 
-
-def teach_note_names(target: "Progress", current: "Progress") -> bool:
-    """Adds new note names to be taught to the user, returns True if any new
-    notes are being taught.
-    """
-    fret_target = 5
-    while fret_target < 24:
-        for i, progress in enumerate(current.string_progress):
-            if i == 0:
-                prev_string_learnt = True
-            else:
-                prev_progress = current.string_progress[i - 1][1]
-                prev_string_learnt = (
-                    prev_progress is not None and prev_progress >= fret_target
-                )
-
-            if progress[0] is None and prev_string_learnt:
+            if progress[0] is None or progress[0] < fret_target:
                 target.string_progress[i] = (fret_target, None)
                 return True
         fret_target += 2
@@ -133,9 +114,6 @@ class Progress:
 
         if not new_topic:
             new_topic = teach_frets(target, current)
-
-        if not new_topic:
-            new_topic = teach_note_names(target, current)
 
         if not new_topic:
             new_topic = teach_scales(target, current)

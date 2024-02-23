@@ -133,7 +133,7 @@ class Pitch:
 def frequency_to_offset(frequency: float) -> int:
     """Returns the nearest semitone offset of a note from A4, given the note's
     frequency."""
-    return round(12 * np.log2(frequency / 440))
+    return round(frequency_to_offset_unrounded(frequency))
 
 
 def frequency_to_offset_unrounded(frequency: float) -> int:

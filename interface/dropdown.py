@@ -1,7 +1,4 @@
-import gc
 from typing import Callable
-
-from pyglet import clock
 
 from .scroll_container import ScrollContainer
 from .style import Colours
