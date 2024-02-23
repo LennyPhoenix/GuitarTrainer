@@ -11,11 +11,13 @@ from .note import Note
 class Config(TypedDict):
     input_device: str | None
     tuner_accidentals: str
+    default_instrument: str
 
 
 DEFAULT_CONFIG: Config = {
     "input_device": None,
     "tuner_accidentals": Note.Mode.SHARPS.name,
+    "default_instrument": Instrument.GUITAR.name,
 }
 
 
@@ -147,7 +149,7 @@ class StorageManager:
     @property
     def tuner_accidentals(self) -> Note.Mode:
         config = self._load_config()
-        return Note.Mode.__members__[
+        return Note.Mode[
             config.get("tuner_accidentals", Note.Mode.SHARPS.name)
         ]
 
@@ -155,4 +157,17 @@ class StorageManager:
     def tuner_accidentals(self, tuner_accidentals: Note.Mode):
         config = self._load_config()
         config["tuner_accidentals"] = tuner_accidentals.name
+        self._save_config(config)
+
+    @property
+    def default_instrument(self) -> Instrument:
+        config = self._load_config()
+        return Instrument[
+            config.get("default_instrument", Instrument.GUITAR.name)
+        ]
+
+    @default_instrument.setter
+    def default_instrument(self, default_instrument: Instrument):
+        config = self._load_config()
+        config["default_instrument"] = default_instrument.name
         self._save_config(config)

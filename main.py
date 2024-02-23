@@ -99,6 +99,7 @@ class Root(Frame):
             self.fretboard = FretboardExplorer(
                 window=self.window,
                 sound_manager=self.sound_manager,
+                storage_manager=self.storage_manager,
                 parent=self.content_container,
             )
         else:

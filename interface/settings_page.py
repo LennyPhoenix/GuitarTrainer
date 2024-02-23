@@ -7,7 +7,7 @@ from framework.components import Label, Text
 
 from pyglet.window import Window
 
-from engine import SoundManager, StorageManager, Note
+from engine import SoundManager, StorageManager, Note, Instrument
 
 
 class SettingsPage(BorderedRectangle):
@@ -68,6 +68,20 @@ class SettingsPage(BorderedRectangle):
         tuner_accidentals.set_handler("on_picked", self.on_tuner_accidentals_assigned)
         self.add_setting("Tuner Accidentals", tuner_accidentals)
 
+        default_instrument = Dropdown(
+            default=storage_manager.default_instrument.name,
+            elements=lambda: list(Instrument.__members__.keys()),
+            size=Size(
+                matrix=Mat2((1.0, 0.0, 0.0, 1.0)),
+                constant=Vec2(-64.0, -64.0),
+            ),
+            position=Position(),
+            parent=None,
+            window=window,
+        )
+        default_instrument.set_handler("on_picked", self.on_default_instrument_assigned)
+        self.add_setting("Default Instrument", default_instrument)
+
         self.help_text = Text(
             """The pitch tracker likes harmonics, turn your tone knob up!
 P.S. Make sure to turn the volume of your mic/audio interface all the way up!""",
@@ -90,16 +104,12 @@ P.S. Make sure to turn the volume of your mic/audio interface all the way up!"""
         self.storage_manager.input_device = option
 
     def on_tuner_accidentals_assigned(self, option: str):
-        match option:
-            case Note.Mode.SHARPS.name:
-                acc = Note.Mode.SHARPS
-            case Note.Mode.FLATS.name:
-                acc = Note.Mode.FLATS
-            case _:
-                print("Invalid option")
-                return
-
+        acc = Note.Mode[option]
         self.storage_manager.tuner_accidentals = acc
+
+    def on_default_instrument_assigned(self, option: str):
+        instrument = Instrument[option]
+        self.storage_manager.default_instrument = instrument
 
     def add_setting(self, label: str, component: Frame):
         position: Position

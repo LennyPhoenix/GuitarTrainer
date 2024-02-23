@@ -1,10 +1,9 @@
 from pyglet.window import Window
-from engine import Instrument, Pitch, Note
 
 from framework import Frame, Size, Pin, Position, Mat2, Vec2
 from framework.components import Label, Text
 
-from engine import SoundManager
+from engine import Instrument, Pitch, Note, StorageManager, SoundManager
 
 from .fretboard import Fretboard
 from .dropdown import Dropdown
@@ -13,12 +12,11 @@ from .bordered_rect import BorderedRectangle
 
 
 class FretboardExplorer(BorderedRectangle):
-    DEFAULT = Instrument.GUITAR
-
     def __init__(
         self,
         window: Window,
         sound_manager: SoundManager,
+        storage_manager: StorageManager,
         parent: Frame | None,
     ):
         super().__init__(
@@ -31,9 +29,10 @@ class FretboardExplorer(BorderedRectangle):
         )
 
         sound_manager.push_handlers(self)
+        self.storage_manager = storage_manager
 
         self.dropdown = Dropdown(
-            default=self.DEFAULT.value.name,
+            default=self.storage_manager.default_instrument.value.name,
             window=window,
             size=Size(
                 constant=Vec2(256, 64),
@@ -77,7 +76,7 @@ Blue - Octave""",
             font_size=32,
         )
 
-        self.construct_fretboard(self.DEFAULT.value.strings)
+        self.construct_fretboard(self.storage_manager.default_instrument.value.strings)
 
     def construct_fretboard(self, strings: list[Pitch]):
         self.fretboard = Fretboard(

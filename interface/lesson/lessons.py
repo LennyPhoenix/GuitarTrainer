@@ -23,8 +23,6 @@ class Lessons(Frame):
     current_mode: Mode = Mode.SELECTION
     content: LessonSelection | LessonInterface | None = None
 
-    instrument: Instrument = LessonSelection.DEFAULT_INSTRUMENT
-
     lesson: Lesson | None = None
     complete: bool = True  # whether this is an old lesson or not
     exercise: int = 0
@@ -39,6 +37,7 @@ class Lessons(Frame):
         self.window = window
         self.storage = storage_manager
         self.sound = sound_manager
+        self.instrument = self.storage.default_instrument
 
         super().__init__(
             size=Size(matrix=Mat2()),

@@ -9,14 +9,12 @@ from pyglet.window import Window
 
 
 class LessonSelection(ScrollContainer, EventDispatcher):
-    DEFAULT_INSTRUMENT = Instrument.GUITAR
-
     def __init__(
         self,
         parent: Frame | None,
         window: Window,
         storage_manager: StorageManager,
-        instrument: Instrument = DEFAULT_INSTRUMENT,
+        instrument: Instrument | None = None,
     ):
         self.lessons = []
         self.storage = storage_manager
@@ -29,6 +27,9 @@ class LessonSelection(ScrollContainer, EventDispatcher):
             position=Position(),
             parent=parent,
         )
+
+        if instrument is None:
+            instrument = self.storage.default_instrument
 
         self.dropdown = Dropdown(
             default=instrument.value.name,

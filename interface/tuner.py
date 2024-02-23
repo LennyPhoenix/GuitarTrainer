@@ -18,8 +18,6 @@ from pyglet.window import Window
 
 
 class Tuner(BorderedRectangle):
-    DEFAULT = Instrument.GUITAR
-
     def __init__(
         self,
         window: Window,
@@ -40,7 +38,7 @@ class Tuner(BorderedRectangle):
         self.storage_manager = storage_manager
 
         self.dropdown = Dropdown(
-            default=self.DEFAULT.value.name,
+            default=self.storage_manager.default_instrument.value.name,
             window=window,
             size=Size(
                 constant=Vec2(256, 64),
@@ -67,7 +65,7 @@ class Tuner(BorderedRectangle):
             parent=self,
             font_size=18,
         )
-        self.rebuild_guide(self.DEFAULT.value.strings)
+        self.rebuild_guide(self.storage_manager.default_instrument.value.strings)
 
         self.note_label = Label(
             "Note: N/A",
