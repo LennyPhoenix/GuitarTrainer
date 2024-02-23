@@ -5,13 +5,18 @@ from copy import deepcopy
 
 from .instrument import Instrument
 from .progress import Progress
+from .note import Note
 
 
 class Config(TypedDict):
     input_device: str | None
+    tuner_accidentals: str
 
 
-DEFAULT_CONFIG: Config = {"input_device": None}
+DEFAULT_CONFIG: Config = {
+    "input_device": None,
+    "tuner_accidentals": Note.Mode.SHARPS.name,
+}
 
 
 class ProgressData(TypedDict):
@@ -137,4 +142,17 @@ class StorageManager:
     def input_device(self, device: str | None):
         config = self._load_config()
         config["input_device"] = device
+        self._save_config(config)
+
+    @property
+    def tuner_accidentals(self) -> Note.Mode:
+        config = self._load_config()
+        return Note.Mode.__members__[
+            config.get("tuner_accidentals", Note.Mode.SHARPS.name)
+        ]
+
+    @tuner_accidentals.setter
+    def tuner_accidentals(self, tuner_accidentals: Note.Mode):
+        config = self._load_config()
+        config["tuner_accidentals"] = tuner_accidentals.name
         self._save_config(config)

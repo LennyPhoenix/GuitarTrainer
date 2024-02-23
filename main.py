@@ -87,7 +87,9 @@ class Root(Frame):
 
         if view == View.TUNER:
             self.tuner = Tuner(
+                window=self.window,
                 sound_manager=self.sound_manager,
+                storage_manager=self.storage_manager,
                 parent=self.content_container,
             )
         else:

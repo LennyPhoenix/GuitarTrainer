@@ -2,22 +2,29 @@ from framework import Frame, Size, Position, Pin, Vec2, Mat2
 from framework.components import Label, Rectangle, Text
 
 from engine import (
+    Instrument,
     SoundManager,
+    StorageManager,
     frequency_to_offset,
     Pitch,
-    Note,
     offset_to_frequency,
     frequency_to_offset_unrounded,
 )
 
-from interface import BorderedRectangle
+from interface import BorderedRectangle, Dropdown
 from interface.style import Colours, Sizing
+
+from pyglet.window import Window
 
 
 class Tuner(BorderedRectangle):
+    DEFAULT = Instrument.GUITAR
+
     def __init__(
         self,
+        window: Window,
         sound_manager: SoundManager,
+        storage_manager: StorageManager,
         parent: Frame | None,
     ):
         super().__init__(
@@ -30,16 +37,25 @@ class Tuner(BorderedRectangle):
         )
         sound_manager.push_handlers(self)
 
+        self.storage_manager = storage_manager
+
+        self.dropdown = Dropdown(
+            default=self.DEFAULT.value.name,
+            window=window,
+            size=Size(
+                constant=Vec2(256, 64),
+            ),
+            position=Position(
+                pin=Pin.top_left(),
+                offset=Vec2(18.0, -18.0),
+            ),
+            parent=self,
+            elements=lambda: [i.value.name for i in Instrument],
+        )
+        self.dropdown.set_handler("on_picked", self.on_dropdown_picked)
+
         self.guide = Text(
-            # TODO: Generate based on current setting??? We have string
-            # definitions in the engine
-            """Standard tuning, low to high: (Bass)
-1: E2 (E1)
-2: A2 (A1)
-3: D3 (D2)
-4: G3 (G2)
-5: B3
-6: E4""",
+            """Standard tuning, low to high:""",
             colour=Colours.FOREGROUND,
             position=Position(
                 pin=Pin(
@@ -51,6 +67,7 @@ class Tuner(BorderedRectangle):
             parent=self,
             font_size=18,
         )
+        self.rebuild_guide(self.DEFAULT.value.strings)
 
         self.note_label = Label(
             "Note: N/A",
@@ -83,8 +100,7 @@ class Tuner(BorderedRectangle):
             "0Hz",
             colour=Colours.FOREGROUND,
             position=Position(
-                pin=Pin(remote_anchor=Vec2(0.5, 1.0),
-                        local_anchor=Vec2(0.5, 0.0)),
+                pin=Pin(remote_anchor=Vec2(0.5, 1.0), local_anchor=Vec2(0.5, 0.0)),
                 offset=Vec2(0.0, 20.0),
             ),
             font_size=20,
@@ -98,8 +114,7 @@ class Tuner(BorderedRectangle):
                 constant=Vec2(0.0, 8.0),
             ),
             position=Position(
-                pin=Pin(local_anchor=Vec2(0.5, 0.5),
-                        remote_anchor=Vec2(0.35, 0.5))
+                pin=Pin(local_anchor=Vec2(0.5, 0.5), remote_anchor=Vec2(0.35, 0.5))
             ),
             parent=self,
         )
@@ -149,6 +164,18 @@ class Tuner(BorderedRectangle):
             parent=self.range,
         )
 
+    def on_dropdown_picked(self, option: str):
+        match option:
+            case Instrument.GUITAR.value.name:
+                self.rebuild_guide(Instrument.GUITAR.value.strings)
+            case Instrument.BASS.value.name:
+                self.rebuild_guide(Instrument.BASS.value.strings)
+
+    def rebuild_guide(self, strings: list[Pitch]):
+        self.guide.text = "Standard tuning, low to high:"
+        for i, string in enumerate(strings):
+            self.guide.text += f"\n{i + 1}: {string}"
+
     def on_frequency_change(self, frequency: float | None):
         if frequency is None:
             self.note_label.text = "Note: N/A"
@@ -159,7 +186,7 @@ class Tuner(BorderedRectangle):
 
         offset = frequency_to_offset(frequency)
         difference = frequency_to_offset_unrounded(frequency) - offset
-        pitch = Pitch.from_offset(offset, Note.Mode.SHARPS)
+        pitch = Pitch.from_offset(offset, self.storage_manager.tuner_accidentals)
 
         anchor = difference + 0.5
 

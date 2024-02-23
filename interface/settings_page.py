@@ -7,7 +7,7 @@ from framework.components import Label, Text
 
 from pyglet.window import Window
 
-from engine import SoundManager, StorageManager
+from engine import SoundManager, StorageManager, Note
 
 
 class SettingsPage(BorderedRectangle):
@@ -54,6 +54,20 @@ class SettingsPage(BorderedRectangle):
             input_device,
         )
 
+        tuner_accidentals = Dropdown(
+            default=storage_manager.tuner_accidentals.name,
+            elements=lambda: list(Note.Mode.__members__.keys()),
+            size=Size(
+                matrix=Mat2((1.0, 0.0, 0.0, 1.0)),
+                constant=Vec2(-64.0, -64.0),
+            ),
+            position=Position(),
+            parent=None,
+            window=window,
+        )
+        tuner_accidentals.set_handler("on_picked", self.on_tuner_accidentals_assigned)
+        self.add_setting("Tuner Accidentals", tuner_accidentals)
+
         self.help_text = Text(
             """The pitch tracker likes harmonics, turn your tone knob up!
 P.S. Make sure to turn the volume of your mic/audio interface all the way up!""",
@@ -74,6 +88,18 @@ P.S. Make sure to turn the volume of your mic/audio interface all the way up!"""
     def on_input_device_assigned(self, option: str):
         self.sound_manager.connect(option)
         self.storage_manager.input_device = option
+
+    def on_tuner_accidentals_assigned(self, option: str):
+        match option:
+            case Note.Mode.SHARPS.name:
+                acc = Note.Mode.SHARPS
+            case Note.Mode.FLATS.name:
+                acc = Note.Mode.FLATS
+            case _:
+                print("Invalid option")
+                return
+
+        self.storage_manager.tuner_accidentals = acc
 
     def add_setting(self, label: str, component: Frame):
         position: Position

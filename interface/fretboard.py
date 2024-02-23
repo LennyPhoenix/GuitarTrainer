@@ -97,7 +97,7 @@ class Fretboard(Frame):
                     colour=Colours.FOREGROUND,
                     size=Size(
                         matrix=Mat2((0.0, 0.0, 0.0, 1.0)),
-                        constant=Vec2(4.0, 0.0),
+                        constant=Vec2(8.0, 0.0),
                     ),
                     position=Position(
                         pin=Pin(
