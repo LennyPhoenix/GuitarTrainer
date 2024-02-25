@@ -1,0 +1,19 @@
+[
+  {
+    "string_progress": [
+      [24, 8],
+      [24, 24],
+      [24, 24],
+      [24, 24]
+    ],
+    "highest_note": [100, 100],
+    "scales": {
+      "Major": [false, false],
+      "Minor": [false, false],
+      "Melodic Minor": [false, false],
+      "Harmonic Minor": [false, false],
+      "Pentatonic Major": [false, false],
+      "Pentatonic Minor": [false, false]
+    }
+  }
+]

@@ -1,3 +1,4 @@
+from typing import Set
 from engine import Pitch
 
 from framework import Frame, Size, Position, Pin, Vec2, Mat2
@@ -21,7 +22,7 @@ class Fretboard(Frame):
         parent: Frame | None,
         behind_parent: bool = False,
     ):
-        self.highlights = []
+        self.highlights = {}
         self.string_pitches = strings
         self.fret_count = frets
 
@@ -155,8 +156,10 @@ class Fretboard(Frame):
         if 0 <= string < len(self.string_pitches) and 0 <= fret <= self.fret_count:
             x_pos = fret / self.fret_count
             y_pos = string / (len(self.string_pitches) - 1)
-            self.highlights.append(
-                Rectangle(
+            if (string, fret) in self.highlights.keys():
+                self.highlights[(string, fret)].colour = colour
+            else:
+                self.highlights[(string, fret)] = Rectangle(
                     colour=colour,
                     size=Size(constant=Vec2(32, 32)),
                     position=Position(
@@ -167,7 +170,6 @@ class Fretboard(Frame):
                     ),
                     parent=self.highlights_container,
                 )
-            )
 
     def highlight_pitch(
         self,
@@ -178,22 +180,7 @@ class Fretboard(Frame):
         for i, string in enumerate(self.string_pitches):
             string_offset = string.offset
             difference = offset - string_offset
-            if 0 <= difference <= self.fret_count:
-                x_pos = difference / self.fret_count
-                y_pos = i / (len(self.string_pitches) - 1)
-                self.highlights.append(
-                    Rectangle(
-                        colour=colour,
-                        size=Size(constant=Vec2(32, 32)),
-                        position=Position(
-                            pin=Pin(
-                                local_anchor=Vec2(0.75, 0.5),
-                                remote_anchor=Vec2(x_pos, y_pos),
-                            )
-                        ),
-                        parent=self.highlights_container,
-                    )
-                )
+            self.highlight_fret(i, difference, colour)
 
     def highlight_octaves(self, pitch: Pitch):
         for i in range(0, 6):

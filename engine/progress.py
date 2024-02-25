@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from copy import deepcopy
 
 from .instrument import Instrument
+from .scale import Scale
 
 
 def test_user(target: "Progress", current: "Progress"):
@@ -83,10 +84,10 @@ def teach_scales(target: "Progress", current: "Progress") -> bool:
     """Adds new scales to be taught to the user, returns True if any new scales
     are being taught.
     """
-    top_string = current.string_progress[-1][1]
-    if top_string is not None and top_string >= 12:
+    strings_learnt = all(map(lambda p: p[1] is not None and p[1] >= 12, current.string_progress))
+    if strings_learnt:
         for scale, progress in current.scales.items():
-            if progress is None or not progress[0]:
+            if not progress[0]:
                 target.scales[scale] = (True, False)
                 return True
     return False
@@ -96,7 +97,7 @@ def teach_scales(target: "Progress", current: "Progress") -> bool:
 class Progress:
     string_progress: list[tuple[int | None, int | None]]
     highest_note: tuple[int | None, int | None]
-    scales: dict[str, tuple[bool, bool] | None]
+    scales: dict[str, tuple[bool, bool]]
 
     @staticmethod
     def next_target(

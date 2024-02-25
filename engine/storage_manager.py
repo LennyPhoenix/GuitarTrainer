@@ -24,10 +24,14 @@ DEFAULT_CONFIG: Config = {
 class ProgressData(TypedDict):
     string_progress: list[tuple[int | None, int | None]]
     highest_note: tuple[int | None, int | None]
-    scales: dict[str, tuple[bool, bool] | None]
+    scales: dict[str, tuple[bool, bool]]
 
 
 InstrumentData = list[ProgressData]
+
+
+def gen_default_scales(instrument: Instrument) -> dict[str, tuple[bool, bool]]:
+    return {scale.name: (False, False) for scale in instrument.value.scales}
 
 
 def gen_default_instrument(instrument: Instrument) -> InstrumentData:
@@ -35,13 +39,7 @@ def gen_default_instrument(instrument: Instrument) -> InstrumentData:
         {
             "string_progress": [(None, None)] * len(instrument.value.strings),
             "highest_note": (None, None),
-            "scales": {
-                "major": None,
-                "minor": None,
-                "major_pentatonic": None,
-                "minor_pentatonic": None,
-                "blues": None,
-            },
+            "scales": gen_default_scales(instrument),
         }
     ]
 
@@ -106,7 +104,14 @@ class StorageManager:
                 lambda data: Progress(
                     data["string_progress"],
                     data["highest_note"],
-                    data["scales"],
+                    {
+                        scale.name: (
+                            data["scales"][scale.name]
+                            if scale.name in data["scales"].keys()
+                            else (False, False)
+                        )
+                        for scale in instrument.value.scales
+                    },
                 ),
                 self._load_instrument(instrument),
             )
@@ -149,9 +154,7 @@ class StorageManager:
     @property
     def tuner_accidentals(self) -> Note.Mode:
         config = self._load_config()
-        return Note.Mode[
-            config.get("tuner_accidentals", Note.Mode.SHARPS.name)
-        ]
+        return Note.Mode[config.get("tuner_accidentals", Note.Mode.SHARPS.name)]
 
     @tuner_accidentals.setter
     def tuner_accidentals(self, tuner_accidentals: Note.Mode):
@@ -162,9 +165,7 @@ class StorageManager:
     @property
     def default_instrument(self) -> Instrument:
         config = self._load_config()
-        return Instrument[
-            config.get("default_instrument", Instrument.GUITAR.name)
-        ]
+        return Instrument[config.get("default_instrument", Instrument.GUITAR.name)]
 
     @default_instrument.setter
     def default_instrument(self, default_instrument: Instrument):

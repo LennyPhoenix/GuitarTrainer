@@ -49,10 +49,18 @@ class LessonSelection(ScrollContainer, EventDispatcher):
         self.generate_lessons(instrument)
 
     def on_dropdown_picked(self, instrument: str):
-        instrument_member = filter(
-            lambda i: i.value.name == instrument,
-            Instrument,
-        ).__next__()
+        instrument_member = next(
+            filter(
+                lambda i: i.value.name == instrument,
+                Instrument,
+            ),
+            None,
+        )
+
+        if instrument_member is None:
+            print("Impossible instrument selection made:", instrument)
+            return
+
         self.generate_lessons(instrument_member)
         self.dispatch_event("on_instrument_change", instrument_member)
 

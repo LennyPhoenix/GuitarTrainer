@@ -72,7 +72,7 @@ class SoundManager(EventDispatcher):
 
         if self._buffer_length >= target_length:
             # Sliding Window, means faster updates
-            self._buffer = self._buffer[-target_length * 4 :]
+            self._buffer = self._buffer[-target_length * 4:]
             self._buffer_length = target_length
 
             self._read_frequency(self._buffer)
@@ -125,7 +125,7 @@ class SoundManager(EventDispatcher):
 
         # Crop start (Disabled)
         ignore = 0
-        peak = np.argmax(hps[ignore : len(hps) // 2]) + ignore
+        peak = np.argmax(hps[ignore: len(hps) // 2]) + ignore
 
         # Quadratic Interpolation
         alpha = signal[peak - 1]

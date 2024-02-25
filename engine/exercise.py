@@ -3,11 +3,7 @@ from enum import Enum, auto
 
 from .note import Pitch, Note
 from .instrument import Instrument
-
-
-class Scale(Enum):
-    MAJOR = auto()
-    MINOR = auto()
+from .scale import Scale
 
 
 @dataclass
@@ -20,14 +16,15 @@ class Exercise:
     type: Type
     hint: bool
 
-    # Either the actual note or the starting note of the scale
-    pitch: Pitch
+    # Note to request (Note name or stave note only)
+    pitch: Pitch | None = None
 
     # Note name only
     string: Pitch | None = None
 
     # Scale only
     scale: Scale | None = None
+    starting_fret: int | None = None
 
     def __hash__(self) -> int:
         return hash(
@@ -128,3 +125,15 @@ class Exercise:
         )
         to_add *= 3
         return to_add
+
+    @staticmethod
+    def new_scale(scale: Scale, teaching: bool = True) -> "list[Exercise]":
+        return [
+            Exercise(
+                type=Exercise.Type.SCALE,
+                hint=teaching,
+                scale=scale,
+                starting_fret=i,
+            )
+            for i in range(12)
+        ]
