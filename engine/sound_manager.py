@@ -27,6 +27,7 @@ class SoundManager(EventDispatcher):
 
 
     """
+
     # The minimum average magnitude of each frame for it to not be discorded
     noise_threshold: float = 0.1
     # The size of the sliding window in seconds
@@ -114,7 +115,7 @@ class SoundManager(EventDispatcher):
             # from the front of the array. Newest data is appended to the back.
             # This way we get fast updates and keep using the latest data we
             # have received.
-            self._buffer = self._buffer[-target_length * 4:]
+            self._buffer = self._buffer[-target_length * 4 :]
             self._buffer_length = target_length
 
             # Only read the frequency if the buffer is full.
@@ -167,14 +168,14 @@ class SoundManager(EventDispatcher):
 
         # Crop to the lowest spectrum size
         target_length = min(map(len, spectra))
-        cropped_spectra = np.array(map(lambda s: s[:target_length], spectra))
+        cropped_spectra = np.array(list(map(lambda s: s[:target_length], spectra)))
 
         # Take HPS
         hps = np.prod(cropped_spectra, axis=0)
 
         # Crop start (Disabled)
         ignore = 0
-        peak = np.argmax(hps[ignore:len(hps) // 2]) + ignore
+        peak = np.argmax(hps[ignore : len(hps) // 2]) + ignore
 
         # Quadratic Interpolation
         alpha = signal[peak - 1]
