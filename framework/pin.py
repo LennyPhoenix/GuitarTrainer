@@ -6,7 +6,11 @@ from framework.update_hook import UpdateHook
 
 @dataclass
 class Pin(UpdateHook):
+    """Represents the positional relationship between two frames."""
+
+    # Fraction of the object's own size that position is anchored to
     local_anchor: Vec2
+    # Fraction of the object's parent's size that position is anchored to
     remote_anchor: Vec2
 
     @staticmethod

@@ -16,16 +16,25 @@ class Size(UpdateHook):
     min: None | Vec2 = None
 
     def calc_size(self, remote_size: None | Vec2) -> Vec2:
+        """Calculate the absolute size of the frame.
+
+        Takes the remote (parent's) size.
+        """
+
         if remote_size is not None:
+            # If remote size is passed, start with the relative size...
             actual_size = self.matrix @ remote_size
         else:
+            # ...otherwise start with zero.
             actual_size = Vec2(0, 0)
         actual_size += self.constant
 
+        # Clamp to min...
         if self.min is not None:
             actual_size = Vec2(
                 max(self.min.x, actual_size.x), max(self.min.y, actual_size.y)
             )
+        # ...and max.
         if self.max is not None:
             actual_size = Vec2(
                 min(self.max.x, actual_size.x), min(self.max.y, actual_size.y)

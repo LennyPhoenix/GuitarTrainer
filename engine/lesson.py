@@ -8,10 +8,18 @@ from .instrument import Instrument
 
 @dataclass
 class Lesson:
-    """A lesson is a collection of exercises."""
+    """A lesson is a collection of exercises alongside the intended progress
+    once the lesson is complete.
 
+    If the lesson is completed successfully, then this target progress has been
+    achieved.
+    """
+
+    # The lesson index
     number: int
+    # All exercises to be shown in the lesson
     exercises: list[Exercise]
+    # Intended target progress
     target_progress: Progress
 
     @staticmethod
@@ -27,8 +35,11 @@ class Lesson:
         for string_index, string_target in enumerate(target.string_progress):
             string = instrument.value.strings[string_index]
             string_last = last.string_progress[string_index]
+
+            # A string is to be taught
+            # > Remember that [0] is whether it was taught, [1] is whether it
+            # > was memorised.
             if string_target[0] != string_last[0]:
-                # A string is to be taught
                 exercises += Exercise.new_frets(
                     string_last[0],
                     string_target[0],
@@ -36,8 +47,8 @@ class Lesson:
                     teaching=True,
                 )
 
+            # A string is to be tested
             if string_target[1] != string_last[1]:
-                # A string is to be tested
                 exercises += Exercise.new_frets(
                     string_last[1],
                     string_target[1],
@@ -62,7 +73,9 @@ class Lesson:
                 teaching=False,
             )
 
-        for scale_name, scale_progress in target.scales.items():
+        for scale_name, target_progress in target.scales.items():
+            # Find each actual scale by name
+            # This next(filter(...), None) call is essentially a find(...) call
             scale = next(
                 filter(
                     lambda scale: scale.name == scale_name,
@@ -77,18 +90,20 @@ class Lesson:
                 continue
 
             last_progress = last.scales[scale_name]
-            if scale_progress is not None:
-                if scale_progress[0] and (
+            if target_progress is not None:
+                # A new scale is to be taught
+                if target_progress[0] and (
                     last_progress is None or not last_progress[0]
                 ):
-                    # A new scale is to be taught
                     exercises += Exercise.new_scale(scale)
-                if scale_progress[1] and (
+
+                # A new scale is to be tested
+                if target_progress[1] and (
                     last_progress is None or not last_progress[1]
                 ):
-                    # A new scale is to be tested
                     exercises += Exercise.new_scale(scale, teaching=False)
 
+        # Shuffle lesson exercises, so we don't get the same order every time
         shuffle(exercises)
 
         return Lesson(

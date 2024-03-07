@@ -13,6 +13,11 @@ from pyglet.resource import image
 
 
 class LessonButton(BorderedRectangle, EventDispatcher):
+    """A lesson start button for the lesson selection interface.
+
+    Contains some information about the lesson and a play button to start it.
+    """
+
     def __init__(
         self,
         position: Position,
@@ -68,6 +73,7 @@ class LessonButton(BorderedRectangle, EventDispatcher):
                 exercises[(exercise.type, exercise.hint)] = 0
             exercises[(exercise.type, exercise.hint)] += 1
 
+        # Pretty print the exercises and their counts
         pretty = ""
         for key, value in exercises.items():
             modifier = "NEW" if key[1] else "practice for"
@@ -80,7 +86,7 @@ class LessonButton(BorderedRectangle, EventDispatcher):
                 case Exercise.Type.SCALE:
                     name = "Scales"
 
-            pretty += f"- {value} {modifier} {name}\n"
+            pretty += f"- {value} {modifier} {name} exercises\n"
 
         self.text = Text(
             text=pretty,
@@ -94,6 +100,7 @@ class LessonButton(BorderedRectangle, EventDispatcher):
         )
 
     def on_button_pressed(self):
+        """Called when the start button is pressed."""
         self.dispatch_event("on_started", self.lesson, self.complete)
 
 

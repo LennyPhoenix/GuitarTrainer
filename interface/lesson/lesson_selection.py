@@ -9,6 +9,12 @@ from pyglet.window import Window
 
 
 class LessonSelection(ScrollContainer, EventDispatcher):
+    """Interface for selecting a lesson.
+
+    Builds a list of `LessonButton`s based on the progress snapshots for an
+    instrument.
+    """
+
     def __init__(
         self,
         parent: Frame | None,
@@ -49,6 +55,10 @@ class LessonSelection(ScrollContainer, EventDispatcher):
         self.generate_lessons(instrument)
 
     def on_dropdown_picked(self, instrument: str):
+        """Called when a new instrument is selected."""
+
+        # Essentially a `find(...)` call to get the first instrument with the
+        # selected name.
         instrument_member = next(
             filter(
                 lambda i: i.value.name == instrument,
@@ -65,12 +75,16 @@ class LessonSelection(ScrollContainer, EventDispatcher):
         self.dispatch_event("on_instrument_change", instrument_member)
 
     def generate_lessons(self, instrument: Instrument):
+        """Rebuilds the lesson list."""
+        # Discard old lessons
         self.lessons.clear()
 
         instrument_progress = self.storage.get_instrument_progress(instrument)
 
         for i, progress_snapshot in enumerate(instrument_progress):
+            # If it is the first progress snapshot...
             if i == 0:
+                # Anchor to the top of the window.
                 parent = self.content
                 position = Position(
                     pin=Pin(
@@ -81,6 +95,7 @@ class LessonSelection(ScrollContainer, EventDispatcher):
                 )
                 matrix = Mat2((0.7, 0.0, 0.0, 0.0))
             else:
+                # Otherwise, anchor to previous lesson.
                 parent = self.lessons[i - 1]
                 position = Position(
                     pin=Pin(
@@ -91,15 +106,19 @@ class LessonSelection(ScrollContainer, EventDispatcher):
                 )
                 matrix = Mat2((1.0, 0.0, 0.0, 0.0))
 
+            # Lesson is complete if it is not the last progress snapshot.
             complete = i < len(instrument_progress) - 1
             if not complete:
+                # Construct a new temporary target if it is not complete.
                 target_progress = Progress.next_target(
                     progress_snapshot,
                     instrument,
                 )
             else:
+                # Use the existing target if the lesson is complete already.
                 target_progress = instrument_progress[i + 1]
 
+            # Builds the lesson
             lesson = Lesson.new_from_progress(
                 i,
                 progress_snapshot,
@@ -107,6 +126,7 @@ class LessonSelection(ScrollContainer, EventDispatcher):
                 instrument,
             )
 
+            # Construct lesson start button
             lesson_button = LessonButton(
                 position=position,
                 parent=parent,
@@ -138,6 +158,7 @@ class LessonSelection(ScrollContainer, EventDispatcher):
         self.rebuild()
 
     def on_lesson_started(self, lesson: Lesson, complete: bool):
+        """Forward lesson start event to parent."""
         self.dispatch_event("on_started", lesson, complete)
 
 

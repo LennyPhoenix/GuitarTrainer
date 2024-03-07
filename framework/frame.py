@@ -13,12 +13,17 @@ import gc
 
 
 class Frame(Node):
+    """The base class that all UI components must inherit from."""
+
     size: Size
     position: Position
 
     aabb: Aabb
+    # The union AABB containing every child's AABB
     broad_phase_aabb: Aabb
+    # The draw index (depth of the node)
     index: int = 0
+    # Whether to draw behind or in front of the parent
     behind_parent: bool
 
     _group: Group | None = None
@@ -33,8 +38,10 @@ class Frame(Node):
         super().__init__()
         self.size = size
         self.size.set_handler("on_update", self.on_size_update)
+
         self.position = position
         self.position.set_handler("on_update", self.on_position_update)
+
         self.behind_parent = behind_parent
         self.aabb = Aabb(Vec2(), Vec2())
         self.broad_phase_aabb = Aabb(Vec2(), Vec2())
@@ -44,17 +51,24 @@ class Frame(Node):
         self.propagate_position()
 
     def add_child(self, other: Self):
+        """Override Node's `add_child` to update the size and position of the
+        child."""
         super().add_child(other)
         other.propagate_size()
         other.propagate_position()
 
     def rebuild_groups(self):
+        """Rebuilds groups by travelling to the top of the tree, then
+        propagating groups downwards recursively."""
         if self.parent is not None:
+            # Get to the top...
             self.parent.rebuild_groups()
         else:
+            # ...then rebuild downwards.
             self.propagate_groups(None)
 
     def rebuild(self):
+        """Schedule a garbage collection then rebuild groups."""
         # This is a lovely side-effect of the way the garbage collector works
         # and deals with cyclic references.
         # Calling gc.collect() directly here will not work as the callstack
@@ -82,6 +96,11 @@ class Frame(Node):
         """Update any drawables to use the newly assigned group."""
 
     def propagate_draw(self):
+        """Recursively draw all frames in the tree.
+
+        Draws children behind the frame, then self, then the children in front
+        of the frame.
+        """
         for child in self.children:
             if child.behind_parent:
                 child.propagate_draw()
@@ -93,6 +112,7 @@ class Frame(Node):
                 child.propagate_draw()
 
     def propagate_size(self):
+        """Recursively propagate size calculations down the tree."""
         # Ignore parent size if there is no parent
         if self.parent is not None:
             parent_size = self.parent.aabb.size
@@ -107,6 +127,7 @@ class Frame(Node):
             child.propagate_size()
 
     def propagate_position(self):
+        """Recursively propagate position calculations down the tree."""
         # Ignore parent AABB if there is no parent
         if self.parent is not None:
             parent_aabb = self.parent.aabb
@@ -120,6 +141,7 @@ class Frame(Node):
         )
         self.set_position()
 
+        # Calculate broad phase by unioning every aabb
         self.broad_phase_aabb = self.aabb
         for child in self.children:
             child.propagate_position()
@@ -128,6 +150,7 @@ class Frame(Node):
             )
 
     def propagate_groups(self, parent_group: Group | None):
+        """Recursively propagate pyglet groups."""
         group = self.build_group(parent_group)
         self._group = group
         self.set_group(group)
@@ -135,6 +158,7 @@ class Frame(Node):
         for child in self.children:
             child.propagate_groups(group)
 
+    # Propagate update hooks
     def on_size_update(self):
         self.propagate_size()
         self.propagate_position()

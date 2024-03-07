@@ -11,6 +11,12 @@ from engine import SoundManager, StorageManager, Note, Instrument
 
 
 class SettingsPage(BorderedRectangle):
+    """The application's settings menu.
+
+    Each setting is added as a separate entry, and setting changes are relayed
+    to the storage manager.
+    """
+
     components: list[tuple[BorderedRectangle, Label, Frame]]
 
     def __init__(
@@ -34,11 +40,14 @@ class SettingsPage(BorderedRectangle):
             parent=parent,
         )
 
+        # Input Device
         in_device = storage_manager.input_device
+        # Check current device is available
         if in_device is None or in_device not in sound_manager.get_available_devices():
             in_device = "Please select"
         input_device = Dropdown(
             default=in_device,
+            # Keep up to date with available input device names
             elements=sound_manager.get_available_devices,
             size=Size(
                 matrix=Mat2((1.0, 0.0, 0.0, 1.0)),
@@ -54,6 +63,7 @@ class SettingsPage(BorderedRectangle):
             input_device,
         )
 
+        # Tuner Accidentals preference
         tuner_accidentals = Dropdown(
             default=storage_manager.tuner_accidentals.name,
             elements=lambda: list(Note.Mode.__members__.keys()),
@@ -68,6 +78,7 @@ class SettingsPage(BorderedRectangle):
         tuner_accidentals.set_handler("on_picked", self.on_tuner_accidentals_assigned)
         self.add_setting("Tuner Accidentals", tuner_accidentals)
 
+        # Default Instrument preference
         default_instrument = Dropdown(
             default=storage_manager.default_instrument.name,
             elements=lambda: list(Instrument.__members__.keys()),
@@ -82,6 +93,7 @@ class SettingsPage(BorderedRectangle):
         default_instrument.set_handler("on_picked", self.on_default_instrument_assigned)
         self.add_setting("Default Instrument", default_instrument)
 
+        # Just some helpful info for the user
         self.help_text = Text(
             """The pitch tracker likes harmonics, turn your tone knob up!
 P.S. Make sure to turn the volume of your mic/audio interface all the way up!""",
@@ -100,22 +112,28 @@ P.S. Make sure to turn the volume of your mic/audio interface all the way up!"""
         )
 
     def on_input_device_assigned(self, option: str):
+        """Relays input device to storage manager."""
         self.sound_manager.connect(option)
         self.storage_manager.input_device = option
 
     def on_tuner_accidentals_assigned(self, option: str):
+        """Relays tuner accidentals to storage manager."""
         acc = Note.Mode[option]
         self.storage_manager.tuner_accidentals = acc
 
     def on_default_instrument_assigned(self, option: str):
+        """Relays default instrument to storage manager."""
         instrument = Instrument[option]
         self.storage_manager.default_instrument = instrument
 
     def add_setting(self, label: str, component: Frame):
+        """Adds a new setting entry to the storage manager."""
         position: Position
         parent: Frame
         size_constant: Vec2
         behind_parent: bool
+
+        # Make each entry cascade down the screen
         if len(self.components) >= 1:
             position = Position(
                 pin=Pin(
@@ -163,6 +181,7 @@ P.S. Make sure to turn the volume of your mic/audio interface all the way up!"""
             font_size=18,
         )
 
+        # Assign new values to ensure it fits its container
         component.size = Size(
             matrix=Mat2((0.8, 0.0, 0.0, 1.0)), constant=Vec2(-36.0, -12.0)
         )
@@ -177,4 +196,5 @@ P.S. Make sure to turn the volume of your mic/audio interface all the way up!"""
         component.propagate_size()
         component.propagate_position()
 
+        # Add to the list
         self.components.append((container, comp_label, component))

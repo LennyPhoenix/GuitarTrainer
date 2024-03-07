@@ -12,8 +12,13 @@ import numpy as np
 
 
 class Name(Enum):
-    # Why oh why..? Standard pitch is centered around A, but the octave
-    # increments on C. This is why the values here look a little odd.
+    """A note name, A through G.
+
+    The value of each note corresponds to its offset from A.
+    """
+
+    # Standard pitch is centered around A, but the octave increments on C. This
+    # is why the values here look a little odd.
     C = -9
     D = -7
     E = -5
@@ -27,6 +32,11 @@ class Name(Enum):
 
 
 class Accidental(Enum):
+    """A note's accidental.
+
+    The value of each accidental corresponds to the semitone offset it adds.
+    """
+
     DOUBLE_FLAT = -2
     FLAT = -1
     NATURAL = 0
@@ -34,6 +44,7 @@ class Accidental(Enum):
     DOUBLE_SHARP = 2
 
     def __str__(self) -> str:
+        # Convert to renderable symbols
         match self:
             case Accidental.DOUBLE_FLAT:
                 return "𝄫"
@@ -49,13 +60,23 @@ class Accidental(Enum):
 
 @dataclass
 class Note:
+    """A note is defined as a combination of a note name and an accidental.
+
+    E.g. A natural, or B flat.
+    """
+
     name: Name
     accidental: Accidental = Accidental.NATURAL
 
     class Mode(Enum):
+        """Used when building a Note from a semitone offset, as each note could
+        either be represented as a flat or sharp. We need some way to choose
+        between them."""
+
         SHARPS = auto()
         FLATS = auto()
 
+    # Mapping of offsets to natural notes
     NATURALS = {
         0: (Name.A, Accidental.NATURAL),
         2: (Name.B, Accidental.NATURAL),
@@ -66,6 +87,7 @@ class Note:
         10: (Name.G, Accidental.NATURAL),
     }
 
+    # Mapping of offsets to unique sharps
     SHARPS = {
         1: (Name.A, Accidental.SHARP),
         4: (Name.C, Accidental.SHARP),
@@ -74,6 +96,7 @@ class Note:
         11: (Name.G, Accidental.SHARP),
     }
 
+    # Mapping of offsets to unique flats
     FLATS = {
         1: (Name.B, Accidental.FLAT),
         4: (Name.D, Accidental.FLAT),
@@ -110,6 +133,8 @@ class Note:
 
 @dataclass
 class Pitch:
+    """A pitch is defined as a note with an octave, for example A sharp 4."""
+
     note: Note
     octave: int
 

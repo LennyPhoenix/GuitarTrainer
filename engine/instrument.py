@@ -8,15 +8,25 @@ from .scale import Scale
 
 @dataclass
 class InstrumentData:
+    """The data that defines each unique instrument."""
+
+    # Pretty printed name
     name: str
+    # Open pitch for each string, low to high
     strings: list[Pitch]
+    # Clef used in the stave
     clef: Clef
+    # Lowest pitch that can be played
     lowest_pitch: Pitch
+    # All defined scales for the instrument
     scales: list[Scale]
+    # How much to transpose the instrument's stave by
     transposition: int = 0
 
 
 class Instrument(Enum):
+    """Each available instrument and their corresponding definitions."""
+
     GUITAR = InstrumentData(
         name="Guitar",
         strings=[

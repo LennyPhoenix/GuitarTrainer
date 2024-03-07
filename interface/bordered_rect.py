@@ -5,6 +5,9 @@ from interface.style import Colours, Sizing
 
 
 class BorderedRectangle(Rectangle):
+    """A simple bordered rectangle, border is added to the **outside** of the
+    rectangle."""
+
     def __init__(
         self,
         size: Size,

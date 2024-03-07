@@ -12,6 +12,8 @@ from pyglet.event import EventDispatcher
 
 
 class DropdownElement(Rectangle, EventDispatcher):
+    """An element of a dropdown box, essentially a button with text."""
+
     def __init__(
         self,
         option: str,
@@ -41,8 +43,7 @@ class DropdownElement(Rectangle, EventDispatcher):
             text=self.option,
             colour=Colours.FOREGROUND,
             position=Position(
-                pin=Pin(local_anchor=Vec2(0.0, 0.5),
-                        remote_anchor=Vec2(0.0, 0.5))
+                pin=Pin(local_anchor=Vec2(0.0, 0.5), remote_anchor=Vec2(0.0, 0.5))
             ),
             parent=self.button,
             font_size=24,
@@ -59,6 +60,8 @@ class DropdownElement(Rectangle, EventDispatcher):
             case Button.State.HOVER:
                 self.colour = Colours.HOVER
                 if old_state == Button.State.PRESSED:
+                    # Old state was pressed new state is hover, so user
+                    # released while over the button:
                     self.dispatch_event("on_selected", self.option)
             case Button.State.PRESSED:
                 self.colour = Colours.PRESSED
@@ -70,6 +73,12 @@ DropdownElement.register_event_type("on_selected")
 
 
 class SelectionBox(BorderedRectangle, EventDispatcher):
+    """The pop-up box that appears when the dropdown button is pressed.
+
+    Contains a list of `DropdownElement` objects, constructed from the
+    `options` list passed.
+    """
+
     def __init__(
         self,
         options: list[str],
@@ -122,6 +131,7 @@ class SelectionBox(BorderedRectangle, EventDispatcher):
             self.elements.append(element)
 
     def on_element_selected(self, option: str):
+        # Forward event to root `Dropdown`
         self.dispatch_event("on_picked", option)
 
 
@@ -129,6 +139,14 @@ SelectionBox.register_event_type("on_picked")
 
 
 class Dropdown(BorderedRectangle, EventDispatcher):
+    """A dropdown box element.
+
+    Appears as a button, opening a selection box when pressed.
+
+    Takes a function that returns a list of elements to display, useful for
+    dynamic options.
+    """
+
     selection_box: SelectionBox | None = None
 
     def __init__(
@@ -158,7 +176,7 @@ class Dropdown(BorderedRectangle, EventDispatcher):
             colour=Colours.FOREGROUND,
             position=Position(pin=Pin.centre()),
             parent=self,
-            font_size=18
+            font_size=18,
         )
 
     def on_button_state_change(
@@ -173,6 +191,7 @@ class Dropdown(BorderedRectangle, EventDispatcher):
         else:
             self.colour = Colours.ELEMENT_BACKGROUND
 
+        # Toggle the selection box if pressed
         if old_state == Button.State.PRESSED and new_state == Button.State.HOVER:
             if self.selection_box is not None:
                 self.close_box()
@@ -182,15 +201,16 @@ class Dropdown(BorderedRectangle, EventDispatcher):
                     self,
                     self.window,
                 )
-                self.selection_box.set_handler(
-                    "on_picked", self.on_element_picked)
+                self.selection_box.set_handler("on_picked", self.on_element_picked)
                 self.rebuild_groups()
 
     def close_box(self):
+        """Closes the selection box."""
         self.selection_box = None
         self.rebuild()
 
     def on_element_picked(self, option: str):
+        """Called when an option is picked from the selection box."""
         self.label.text = option
         self.close_box()
         self.dispatch_event("on_picked", option)

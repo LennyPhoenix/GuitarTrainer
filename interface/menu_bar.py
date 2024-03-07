@@ -15,6 +15,12 @@ from .bordered_rect import BorderedRectangle
 
 
 class View(Enum):
+    """All possible views in the application.
+
+    Consider the window as a finite state machine, it can view one of these
+    states at a time and may transition to any state at any given moment.
+    """
+
     APP = auto()
     SETTINGS = auto()
     TUNER = auto()
@@ -22,6 +28,8 @@ class View(Enum):
 
 
 class MenuBar(BorderedRectangle, EventDispatcher):
+    """The menu bar displayed at the top of the screen at all times."""
+
     current_view: View = View.APP
 
     def __init__(self, parent: Frame | None, window: Window):
@@ -65,6 +73,7 @@ class MenuBar(BorderedRectangle, EventDispatcher):
         self.tuner_button = ImageButton(
             image("assets/tuner.png"),
             # Copy size and position of settings
+            parent=self.settings_button,
             size=Size(
                 matrix=Mat2((1.0, 0.0, 0.0, 1.0)),
             ),
@@ -75,7 +84,6 @@ class MenuBar(BorderedRectangle, EventDispatcher):
                 ),
                 offset=Vec2(-Sizing.PADDING * 2, 0.0),
             ),
-            parent=self.settings_button,
             window=window,
             size_mode=Image.SizeMode.STRETCH,
             position_mode=Image.PositionMode.CENTRE,
@@ -84,6 +92,8 @@ class MenuBar(BorderedRectangle, EventDispatcher):
 
         self.fretboard_button = ImageButton(
             image("assets/fretboard.png"),
+            # Copy size and position of tuner
+            parent=self.tuner_button,
             size=Size(
                 matrix=Mat2((1.0, 0.0, 0.0, 1.0)),
             ),
@@ -94,7 +104,6 @@ class MenuBar(BorderedRectangle, EventDispatcher):
                 ),
                 offset=Vec2(-Sizing.PADDING * 2, 0.0),
             ),
-            parent=self.tuner_button,
             window=window,
             size_mode=Image.SizeMode.STRETCH,
             position_mode=Image.PositionMode.CENTRE,
@@ -102,10 +111,14 @@ class MenuBar(BorderedRectangle, EventDispatcher):
         self.fretboard_button.set_handler("on_released", self.on_fretboard)
 
     def switch(self, view: View):
+        """Called whenever a button is pressed to change the view."""
         if self.current_view == view:
+            # Change back to application if a button is pressed while its view
+            # is open.
             self.current_view = View.APP
         else:
             self.current_view = view
+        # Broadcast to the root
         self.dispatch_event("on_view", self.current_view)
 
     def on_settings(self):

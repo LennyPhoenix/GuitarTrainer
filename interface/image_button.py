@@ -9,6 +9,11 @@ from interface.style import Colours, Sizing
 
 
 class ImageButton(Image, EventDispatcher):
+    """A styled button rendered as a bordered image.
+
+    Has an event for when pressed and released instead of just a state change.
+    """
+
     def __init__(
         self,
         image: AbstractImage,

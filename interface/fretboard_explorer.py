@@ -12,6 +12,11 @@ from .bordered_rect import BorderedRectangle
 
 
 class FretboardExplorer(BorderedRectangle):
+    """The fretboard explorer view of the application.
+
+    Highlights the detected pitch red, and the octaves as blue.
+    """
+
     def __init__(
         self,
         window: Window,
@@ -79,6 +84,7 @@ Blue - Octave""",
         self.construct_fretboard(self.storage_manager.default_instrument.value.strings)
 
     def construct_fretboard(self, strings: list[Pitch]):
+        """Builds a fretboard with the strings of a selected instrument."""
         self.fretboard = Fretboard(
             strings=strings,
             frets=24,
@@ -96,6 +102,7 @@ Blue - Octave""",
         )
 
     def on_dropdown_picked(self, option: str):
+        """Called when a new instrument is selected for the fretboard."""
         match option:
             case Instrument.GUITAR.value.name:
                 self.construct_fretboard(Instrument.GUITAR.value.strings)
@@ -103,6 +110,8 @@ Blue - Octave""",
                 self.construct_fretboard(Instrument.BASS.value.strings)
 
     def on_new_offset(self, offset: int | None):
+        """Called when the pitch detector has confirmed that a note is being
+        played."""
         self.fretboard.clear_highlight()
         if offset is None:
             self.note_label.text = "Note: N/A"

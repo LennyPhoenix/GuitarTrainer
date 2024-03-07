@@ -18,6 +18,13 @@ from pyglet.window import Window
 
 
 class Tuner(BorderedRectangle):
+    """The instrument tuner page.
+
+    Builds a string list from the instrument and displays the nearest note
+    from the currently detected frequency, alongside the distance from that
+    note.
+    """
+
     def __init__(
         self,
         window: Window,
@@ -163,6 +170,7 @@ class Tuner(BorderedRectangle):
         )
 
     def on_dropdown_picked(self, option: str):
+        """Called when the target instrument is updated."""
         match option:
             case Instrument.GUITAR.value.name:
                 self.rebuild_guide(Instrument.GUITAR.value.strings)
@@ -170,22 +178,28 @@ class Tuner(BorderedRectangle):
                 self.rebuild_guide(Instrument.BASS.value.strings)
 
     def rebuild_guide(self, strings: list[Pitch]):
+        """Rebuilds the guide to show the strings for the selected pitches."""
         self.guide.text = "Standard tuning, low to high:"
         for i, string in enumerate(strings):
             self.guide.text += f"\n{i + 1}: {string}"
 
     def on_frequency_change(self, frequency: float | None):
+        """Updates the tuner to the latest frequency."""
+
         if frequency is None:
+            # Reset if silent
             self.note_label.text = "Note: N/A"
             self.actual_frequency_label.text = "0Hz"
             self.expected_frequency_label.text = "Target: 0Hz"
             self.indicator.colour = (255, 0, 0, 0)
             return
 
+        # Get closest note and difference from target
         offset = frequency_to_offset(frequency)
         difference = frequency_to_offset_unrounded(frequency) - offset
         pitch = Pitch.from_offset(offset, self.storage_manager.tuner_accidentals)
 
+        # Update visuals
         anchor = difference + 0.5
 
         self.note_label.text = f"Note: {pitch}"
@@ -193,6 +207,7 @@ class Tuner(BorderedRectangle):
         self.expected_frequency_label.text = (
             f"Target: {offset_to_frequency(offset):.2f}Hz"
         )
+
         self.indicator.colour = (255, 0, 0, 255)
         self.indicator.position.pin = Pin(
             local_anchor=Vec2(anchor, 0.5), remote_anchor=Vec2(anchor, 0.5)

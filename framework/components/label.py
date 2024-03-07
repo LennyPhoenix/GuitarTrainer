@@ -5,6 +5,8 @@ from pyglet.math import Vec2
 
 
 class Label(Frame):
+    """Single line of text."""
+
     def __init__(
         self,
         text: str,
@@ -51,10 +53,12 @@ class Label(Frame):
         self.label.group = group
 
     def set_size(self):
+        # Size set by the label's content, needs to fit the label
         self.aabb.size.x = self.label.content_width
         self.aabb.size.y = self.label.content_height
 
     def set_position(self):
+        # Need to anchor weirdly because of the way labels work in Pyglet
         self.label.x, self.label.y = self.aabb.position + Vec2(
             0, self.label.content_height
         )

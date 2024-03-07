@@ -1,4 +1,3 @@
-from typing import Set
 from engine import Pitch
 
 from framework import Frame, Size, Position, Pin, Vec2, Mat2
@@ -8,10 +7,19 @@ from .style import Colours
 
 
 class Fretboard(Frame):
+    """A visualisation of the fretboard on the screen.
+
+    Works for any number of strings and frets.
+
+    Allows individual frets or whole pitches to be highlighted.
+    """
+
     FRET_MIN_WIDTH = 32.0
     FRET_MAX_WIDTH = 64.0
     STRING_MIN_HEIGHT = 32.0
     STRING_MAX_HEIGHT = 64.0
+
+    highlights: dict[tuple[int, int], Rectangle]
 
     def __init__(
         self,
@@ -145,6 +153,7 @@ class Fretboard(Frame):
         )
 
     def clear_highlight(self):
+        """Removes all highlighted frets."""
         self.highlights.clear()
 
     def highlight_fret(
@@ -153,12 +162,17 @@ class Fretboard(Frame):
         fret: int,
         colour: tuple[int, int, int, int] = (255, 0, 0, 255),
     ):
+        """Highlights a given fret with a colour."""
+        # Check position is available
         if 0 <= string < len(self.string_pitches) and 0 <= fret <= self.fret_count:
+            # Convert to anchor
             x_pos = fret / self.fret_count
             y_pos = string / (len(self.string_pitches) - 1)
             if (string, fret) in self.highlights.keys():
+                # Override old colour if already highlighted
                 self.highlights[(string, fret)].colour = colour
             else:
+                # Otherwise add a new highlight
                 self.highlights[(string, fret)] = Rectangle(
                     colour=colour,
                     size=Size(constant=Vec2(32, 32)),
@@ -176,6 +190,7 @@ class Fretboard(Frame):
         pitch: Pitch,
         colour: tuple[int, int, int, int] = (255, 0, 0, 255),
     ):
+        """Highlights every instance of a pitch on the fretboard."""
         offset = pitch.offset
         for i, string in enumerate(self.string_pitches):
             string_offset = string.offset
@@ -183,6 +198,9 @@ class Fretboard(Frame):
             self.highlight_fret(i, difference, colour)
 
     def highlight_octaves(self, pitch: Pitch):
+        """Highlights all octaves of a pitch on the fretboard."""
+        # Try a range of octave 0 to 6, as no instruments are higher than this
+        # right now
         for i in range(0, 6):
             if i != pitch.octave:
                 self.highlight_pitch(

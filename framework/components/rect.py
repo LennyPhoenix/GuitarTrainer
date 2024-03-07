@@ -4,8 +4,11 @@ from framework import Size, Position, Frame
 
 
 class Rectangle(Frame):
+    """A coloured rectangle."""
+
     def __init__(
         self,
+        # RGBA
         colour: tuple[int, int, int, int],
         size: Size,
         position: Position,

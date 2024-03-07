@@ -5,9 +5,12 @@ from pyglet.math import Vec2
 
 
 class Text(Frame):
+    """Multiline text."""
+
     def __init__(
         self,
         text: str,
+        # RGBA
         colour: tuple[int, int, int, int],
         size: Size,
         position: Position,
@@ -56,9 +59,11 @@ class Text(Frame):
 
     def set_size(self):
         self.label.width = self.aabb.size.x
+        # Height is set by text's height, to ensure it fits
         self.aabb.size.y = self.label.content_height
 
     def set_position(self):
+        # Strange pyglet label anchoring
         self.label.x, self.label.y = self.aabb.position + Vec2(
             0, self.label.content_height
         )

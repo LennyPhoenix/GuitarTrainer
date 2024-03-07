@@ -21,9 +21,16 @@ from pyglet.resource import image
 
 
 class LessonInterface(Frame, EventDispatcher):
+    """The actual mid-lesson interface.
+
+    Handles each individual exercise.
+    """
+
+    # Specific to the scales exercises
     scale_notes: list[tuple[int, int]] | None = None
     scale_notes_index: int | None = None
     scale_question: Text | None = None
+
     fretboard: Fretboard | None = None
 
     def __init__(
@@ -58,8 +65,7 @@ class LessonInterface(Frame, EventDispatcher):
             window=window,
             parent=self,
         )
-        self.close_button.set_handler(
-            "on_released", self.on_close_button_pressed)
+        self.close_button.set_handler("on_released", self.on_close_button_pressed)
 
         self.question_number = Label(
             text="",
@@ -72,6 +78,8 @@ class LessonInterface(Frame, EventDispatcher):
             parent=self,
         )
 
+        # We have different frames available for different possible layouts,
+        # reducing code repetition later
         self.question_no_hint = Frame(
             size=Size(
                 matrix=Mat2((0.8, 0.0, 0.0, 0.8)),
@@ -109,6 +117,8 @@ class LessonInterface(Frame, EventDispatcher):
         sound_manager.push_handlers(self.on_new_offset)
 
     def show(self):
+        """Displays the current exercise."""
+        # Reset from last exercise
         self.scale_question = None
         self.scale_notes = None
         self.scale_notes_index = None
@@ -129,6 +139,8 @@ class LessonInterface(Frame, EventDispatcher):
         self.rebuild()
 
     def setup_note_name(self, exercise: Exercise):
+        """Displays the note name exercise on the screen."""
+        # Make sure we have the necessary exercise details
         assert exercise.string is not None
         assert exercise.pitch is not None
 
@@ -141,8 +153,11 @@ class LessonInterface(Frame, EventDispatcher):
             parent=(self.question_hint if exercise.hint else self.question_no_hint),
             font_size=48,
         )
+        # Make sure we have the necessary exercise details
         self.content.append(question)
         if exercise.hint:
+            # If it is a hinted exercise (teaching, NOT testing) then display
+            # fretboard on the screen.
             max_fret = -1
             for fret in self.lesson.target_progress.string_progress:
                 if fret[0] is not None:
@@ -163,6 +178,8 @@ class LessonInterface(Frame, EventDispatcher):
             self.content.append(self.fretboard)
 
     def setup_stave(self, exercise: Exercise):
+        """Displays the stave exercise on the screen."""
+        # Ensure we have the necessary fields
         assert exercise.pitch is not None
 
         help_text = Text(
@@ -187,6 +204,7 @@ class LessonInterface(Frame, EventDispatcher):
             parent=(self.question_hint if exercise.hint else self.question_no_hint),
         )
 
+        # Transpose the instrument's stave if applicable
         if exercise.pitch.note.accidental == Accidental.FLAT:
             mode = Note.Mode.FLATS
         else:
@@ -200,12 +218,12 @@ class LessonInterface(Frame, EventDispatcher):
         self.content.append(question)
         self.content.append(help_text)
 
-        if exercise.pitch.note.name in [Name.A, Name.E, Name.F]:
-            determinant = "an"
-        else:
-            determinant = "a"
-
         if exercise.hint:
+            if exercise.pitch.note.name in [Name.A, Name.E, Name.F]:
+                determinant = "an"
+            else:
+                determinant = "a"
+
             hint = Label(
                 text=f"(It is {determinant} {exercise.pitch})",
                 colour=Colours.FOREGROUND,
@@ -216,9 +234,14 @@ class LessonInterface(Frame, EventDispatcher):
             self.content.append(hint)
 
     def setup_scale(self, exercise: Exercise):
+        """Displays a scale exercise on the screen."""
+        # Ensure we have the necessary fields
         assert exercise.scale is not None
         assert exercise.starting_fret is not None
+
+        # If exercise has not yet been started
         if self.scale_notes is None or self.scale_notes_index is None:
+            # Initialise scale notes with scale's pitches with reversal
             trimmed = exercise.scale.shape.copy()[:-1]
             trimmed.reverse()
             self.scale_notes = exercise.scale.shape.copy() + trimmed
@@ -248,6 +271,7 @@ class LessonInterface(Frame, EventDispatcher):
         self.update_scale()
 
     def update_scale(self):
+        """Should be called when a note in the scale is played."""
         assert self.scale_question is not None
         assert self.scale_notes_index is not None
         assert self.scale_notes is not None
@@ -256,6 +280,7 @@ class LessonInterface(Frame, EventDispatcher):
         assert exercise.scale is not None
         assert exercise.starting_fret is not None
 
+        # Scale's starting pitch
         pitch = Pitch.from_offset(
             exercise.starting_fret + self.instrument.value.strings[0].offset,
             Note.Mode.SHARPS,
@@ -266,20 +291,24 @@ class LessonInterface(Frame, EventDispatcher):
 {self.scale_notes_index} / {len(self.scale_notes)}"""
 
         if exercise.hint:
+            # Update fretboard if applicable
             assert self.fretboard is not None
 
+            # Highlight every note in the scale
             for i, (string, fret) in enumerate(exercise.scale.shape):
                 fret = exercise.starting_fret + fret
-                # Ensure playable
+                # Ensure playable, move down the strings until the fret is in
+                # range:
                 while fret < 0:
                     offset = self.instrument.value.strings[string].offset + fret
                     string -= 1
-                    fret = offset - \
-                        self.instrument.value.strings[string].offset
+                    fret = offset - self.instrument.value.strings[string].offset
 
+                # `i` is only from the initial scale, unreversed, so we need to
+                # check against the reversed scale as well:
                 is_highlighted = i in [
-                    self.scale_notes_index,
-                    len(self.scale_notes) - self.scale_notes_index - 1,
+                    self.scale_notes_index,  # original
+                    len(self.scale_notes) - self.scale_notes_index - 1,  # reversed
                 ]
 
                 self.fretboard.highlight_fret(
@@ -289,10 +318,13 @@ class LessonInterface(Frame, EventDispatcher):
                 )
 
     def on_new_offset(self, offset: int):
+        """Update the exercise."""
         match self.lesson.exercises[self.exercise].type:
             case Exercise.Type.NOTE_NAME | Exercise.Type.STAVE_NOTE:
+                # Check note is correct
                 pitch = self.lesson.exercises[self.exercise].pitch
                 if pitch is not None and offset == pitch.offset:
+                    # Move onto the next exercise
                     self.exercise += 1
                     if self.exercise < len(self.lesson.exercises):
                         self.dispatch_event("on_next_exercise", self.exercise)
@@ -314,9 +346,11 @@ class LessonInterface(Frame, EventDispatcher):
                     + starting_fret
                 )
                 if offset == target_offset:
+                    # Check for next note in the scale
                     self.scale_notes_index += 1
 
                     if self.scale_notes_index == len(self.scale_notes):
+                        # Next exercise
                         self.exercise += 1
                         if self.exercise < len(self.lesson.exercises):
                             self.dispatch_event(
@@ -331,6 +365,7 @@ class LessonInterface(Frame, EventDispatcher):
                         self.update_scale()
 
     def on_close_button_pressed(self):
+        """Forward close event to parent."""
         self.sound.remove_handlers(self)
         self.dispatch_event("on_close")
 

@@ -8,7 +8,25 @@ from .scale import Scale
 
 @dataclass
 class Exercise:
+    """An individual exercise for a lesson.
+
+    All exercises have a `type` and `hint` field.
+
+    Also, for note name:
+    - `pitch`
+    - `string`
+
+    For stave:
+    - `pitch`
+
+    For scale:
+    - `scale`
+    - `starting_fret`
+    """
+
     class Type(Enum):
+        """The type of exercise."""
+
         NOTE_NAME = auto()
         STAVE_NOTE = auto()
         SCALE = auto()
@@ -44,14 +62,22 @@ class Exercise:
         string: Pitch,
         teaching: bool,
     ) -> "list[Exercise]":
+        """Constructs a new list of exercises for a range of frets."""
         if target_note is None:
             return []
 
+        # If testing or string is new, then quiz on all frets
         if last_note is None or not teaching:
             last_note = -1
 
+        # Build range:
+        # e.g. last_note = 5 and target_note = 9, then test 6-9
         notes = range(last_note + 1, target_note + 1)
 
+        # Construct an exercise for every fret
+        # We do this twice: once for sharps and once for flats.
+        # After building the list, we convert to and from a set to remove
+        # duplicates.
         to_add = list(
             set(
                 [
@@ -80,7 +106,10 @@ class Exercise:
                 ]
             )
         )
+
+        # Repeat every exercise 3 times
         to_add *= 3
+
         return to_add
 
     @staticmethod
@@ -90,13 +119,19 @@ class Exercise:
         instrument: Instrument,
         teaching: bool = True,
     ) -> "list[Exercise]":
+        """Constructs a new list of exercises for a range of stave notes."""
         if aim is None:
             return []
 
+        # If testing or new to stave, then quiz on all notes
         if last_note is None or not teaching:
             last_note = -1
 
+        # Build range
         notes = range(last_note + 1, aim + 1)
+
+        # Construct an exercises for every stave note in the range
+        # See `new_frets` for why we do this twice.
         to_add = list(
             set(
                 [
@@ -123,11 +158,17 @@ class Exercise:
                 ]
             )
         )
+
+        # Repeat 3 times
         to_add *= 3
+
         return to_add
 
     @staticmethod
     def new_scale(scale: Scale, teaching: bool = True) -> "list[Exercise]":
+        """Constructs a new list of exercises for a scale."""
+
+        # One exercise per fret (up to fret 12)
         return [
             Exercise(
                 type=Exercise.Type.SCALE,
